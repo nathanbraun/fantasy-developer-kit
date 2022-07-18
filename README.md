@@ -1,8 +1,10 @@
 # 2022 Fantasy Football Developer Kit
-## What This Is
-These are the files for 2022 Fantasy Football Developer Kit.
+These are the files for 2022 Fantasy Football Developer Kit. If you're reading
+this and you *haven't* bought the 2022 kit yet, you can get it at
+[https://fantasycoding.com](https://fantasycoding.com).
 
-The Fantasy Football Kit is a follow up
+If you have, let's get started.  See installation instructions and then pick
+back up in the guide.
 
 ## Installing
 If you're not familiar with Git or GitHub, no problem. Just click the `Source
