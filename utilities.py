@@ -236,7 +236,7 @@ if __name__ == '__main__':
     # raw graphql example
     QUERY_STR = """
         query {
-            available(week: 1, season: 2019) {
+            available(week: 1, season: 2020) {
                 fantasymath_id,
                 position,
                 actual
