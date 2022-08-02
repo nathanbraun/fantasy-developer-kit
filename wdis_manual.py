@@ -4,18 +4,21 @@ import seaborn as sns
 from utilities import generate_token, get_sims, LICENSE_KEY, OUTPUT_PATH
 
 WEEK = 1
-SEASON = 2019
+SEASON = 2021
 NSIMS = 1000
 SCORING = {'qb': 'pass6', 'skill': 'ppr', 'dst': 'high'}
+TAG = 'WDIS_MANUAL_EX'  # stored in the output
 
-team1 = ['drew-brees', 'alvin-kamara', 'sony-michel', 'julio-jones',
-        'keenan-allen', 'jared-cook', 'matt-prater', 'lar-dst']
+team1 = ['jalen-hurts', 'saquon-barkley', 'clyde-edwards-helaire',
+         'keenan-allen', 'cooper-kupp', 'dallas-goedert', 'jason-myers',
+         'tb-dst']
 
-team2 = ['russell-wilson', 'christian-mccaffrey', 'saquon-barkley',
-            'corey-davis', 'dante-pettis', 'greg-olsen', 'matt-gay',
-            'buf-dst']
+team2 = ['matthew-stafford', 'christian-mccaffrey', 'antonio-gibson',
+        'tyler-lockett', 'justin-jefferson', 'noah-fant', 'matt-gay',
+        'gb-dst']
 
-wdis = ['sony-michel', 'lesean-mccoy', 'phillip-lindsay', 'royce-freeman']
+wdis = ['clyde-edwards-helaire', 'darrell-henderson', 'ronald-jones',
+    'tony-pollard']
 
 def start_bench_scenarios(wdis):
     """
@@ -133,7 +136,7 @@ if __name__ == '__main__':
 
     g = plot(sims, team1, team2, wdis)
 
-    g.fig.savefig(path.join(OUTPUT_PATH, 'wdis_dist_by_team.png'),
+    g.fig.savefig(path.join(OUTPUT_PATH, f'wdis_dist_by_team_{TAG}.png'),
                 bbox_inches='tight', dpi=500)
 
     # plot wdis players
@@ -145,5 +148,5 @@ if __name__ == '__main__':
     g.add_legend()
     g.fig.subplots_adjust(top=0.9)
     g.fig.suptitle(f'WDIS Projections')
-    g.fig.savefig(path.join(OUTPUT_PATH, f'player_wdis_dist_{WEEK}.png'),
+    g.fig.savefig(path.join(OUTPUT_PATH, f'player_wdis_dist_{TAG}.png'),
                 bbox_inches='tight', dpi=500)

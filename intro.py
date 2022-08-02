@@ -2,7 +2,7 @@ import pandas as pd
 from utilities import LICENSE_KEY, generate_token, get_players, get_sims
 
 # parameters
-SEASON = 2020
+SEASON = 2021
 WEEK = 1
 SCORING = {'qb': 'pass4', 'skill': 'ppr', 'dst': 'mfl'}
 

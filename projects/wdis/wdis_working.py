@@ -2,35 +2,44 @@ import pandas as pd
 from os import path
 import seaborn as sns
 from pandas import Series
-from utilities import (generate_token, get_sims, LICENSE_KEY, get_players,
-                       OUTPUT_PATH)
+from utilities import generate_token, get_sims, LICENSE_KEY, get_players
 
 # generate access token
 token = generate_token(LICENSE_KEY)['token']
 
 WEEK = 1
-SEASON = 2019
+SEASON = 2021
 NSIMS = 1000
 SCORING = {'qb': 'pass6', 'skill': 'ppr', 'dst': 'high'}
 
-team1 = ['drew-brees', 'alvin-kamara', 'sony-michel', 'julio-jones',
-        'keenan-allen', 'jared-cook', 'matt-prater', 'lar-dst']
+team1 = ['jalen-hurts', 'saquon-barkley', 'clyde-edwards-helaire',
+         'keenan-allen', 'cooper-kupp', 'dallas-goedert', 'jason-myers',
+         'tb-dst']
 
-team2 = ['russell-wilson', 'christian-mccaffrey', 'saquon-barkley',
-         'corey-davis', 'dante-pettis', 'greg-olsen', 'matt-gay',
-         'buf-dst']
+team2 = ['matthew-stafford', 'christian-mccaffrey', 'antonio-gibson',
+        'tyler-lockett', 'justin-jefferson', 'noah-fant', 'matt-gay',
+        'gb-dst']
 
-bench = ['lesean-mccoy', 'phillip-lindsay', 'royce-freeman']
+bench = ['darrell-henderson', 'ronald-jones', 'tony-pollard']
 
+USE_SAVED_DATA = True
 
-valid_players = get_players(token, season=SEASON, week=WEEK, **SCORING)
+if USE_SAVED_DATA:
+    valid_players = pd.read_csv(path.join('projects', 'wdis', 'data',
+                                          'valid_players.csv'))
+else:
+    valid_players = get_players(token, season=SEASON, week=WEEK, **SCORING)
 
 list(valid_players['fantasymath_id'])[:20]
 
 # and query sims
 players = team1 + team2 + bench
-sims = get_sims(token, players, week=WEEK, season=SEASON, nsims=NSIMS,
-                **SCORING)
+
+if USE_SAVED_DATA:
+    sims = pd.read_csv(path.join('projects', 'wdis', 'data', 'sims.csv'))
+else:
+    sims = get_sims(token, players, week=WEEK, season=SEASON, nsims=NSIMS,
+                    **SCORING)
 
 sims.head()
 
@@ -52,10 +61,11 @@ def simple_wdis(sims, team1, team2, wdis):
     team1_wdis = team1 + [wdis]
     return (sims[team1_wdis].sum(axis=1) > sims[team2].sum(axis=1)).mean()
 
-team1_no_wdis = ['drew-brees', 'alvin-kamara', 'julio-jones', 'keenan-allen',
-                 'jared-cook', 'matt-prater', 'lar-dst']
+team1_no_wdis = ['jalen-hurts', 'saquon-barkley', 'keenan-allen',
+                'cooper-kupp', 'dallas-goedert', 'jason-myers', 'tb-dst']
 
-wdis = ['sony-michel', 'lesean-mccoy', 'phillip-lindsay', 'royce-freeman']
+wdis = ['clyde-edwards-helaire', 'darrell-henderson', 'ronald-jones',
+        'tony-pollard']
 
 for player in wdis:
     print(player)
@@ -83,9 +93,8 @@ def simple_wdis3(sims, team1, team2, wdis):
         player: (sims[team1_no_wdis + [player]].sum(axis=1) >
                  sims[team2].sum(axis=1)).mean() for player in wdis}
 
-simple_wdis2(sims, team1_no_wdis, team2, wdis)
 simple_wdis3(sims, team1, team2, wdis)
-simple_wdis3(sims, team1, team2, ['matt-prater', 'matt-gay'])
+simple_wdis3(sims, team1, team2, ['saquon-barkley', 'darrell-henderson'])
 
 # throws an error
 # assert False
@@ -113,17 +122,18 @@ def simple_wdis4(sims, team1, team2, wdis):
 simple_wdis4(sims, team1, team2, wdis)
 
 # here's where we landed
-team1 = ['drew-brees', 'alvin-kamara', 'sony-michel', 'julio-jones',
-        'keenan-allen', 'jared-cook', 'matt-prater', 'lar-dst']
+team1 = ['jalen-hurts', 'saquon-barkley', 'clyde-edwards-helaire',
+         'keenan-allen', 'cooper-kupp', 'dallas-goedert', 'jason-myers',
+         'tb-dst']
 
-team2 = ['russell-wilson', 'christian-mccaffrey', 'saquon-barkley',
-         'corey-davis', 'dante-pettis', 'greg-olsen', 'matt-gay',
-         'buf-dst']
+team2 = ['matthew-stafford', 'christian-mccaffrey', 'antonio-gibson',
+        'tyler-lockett', 'justin-jefferson', 'noah-fant', 'matt-gay',
+        'gb-dst']
 
-current_starter = 'sony-michel'
-bench_options = ['lesean-mccoy', 'phillip-lindsay', 'royce-freeman']
-team1_sans_starter = [x for x in team1 if (x != current_starter) and x not in
-                      bench_options]
+
+current_starter = 'clyde-edwards-helaire'
+bench_options = ['darrell-henderson', 'ronald-jones', 'tony-pollard']
+team1_sans_starter = list(set(team1) - set([current_starter]))
 
 # overall score
 sims[team1].sum(axis=1).describe()
@@ -137,6 +147,9 @@ stats.T.drop(['count', 'min', 'max'], axis=1)  # drop unnec columns
 
 # prob of starting the wrong guy
 sims[bench_options].max(axis=1).head()
+
+pd.concat([sims[bench_options].max(axis=1),
+           sims[current_starter]], axis=1).head()
 
 (sims[bench_options].max(axis=1) > sims[current_starter]).mean()
 
@@ -178,17 +191,18 @@ def regret_prob(starter, bench):
     return ((team_w_best_backup > team2_total) &
             (team_w_starter < team2_total)).mean()
 
+# CEH
 win_prob(current_starter)
 wrong_prob(current_starter, bench_options)
 regret_prob(current_starter, bench_options)
 
-# now with next best alternative, lindsay
-sumstats('phillip-lindsay')
-win_prob('phillip-lindsay')
-wrong_prob('phillip-lindsay',
-           ['lesean-mccoy', 'sony-michel', 'royce-freeman'])
-regret_prob('phillip-lindsay',
-            ['lesean-mccoy', 'sony-michel', 'royce-freeman'])
+# now with next best alternative, henderson
+sumstats('darrell-henderson')
+win_prob('darrell-henderson')
+wrong_prob('darrell-henderson',
+           ['clyde-edwards-helaire', 'ronald-jones', 'tony-pollard'])
+regret_prob('darrell-henderson',
+           ['clyde-edwards-helaire', 'ronald-jones', 'tony-pollard'])
 
 # and so on ...
 
@@ -202,22 +216,30 @@ def start_bench_scenarios(wdis):
     } for player in wdis]
 
 
+wdis
+start_bench_scenarios(wdis)
+
 scenarios = start_bench_scenarios(wdis)
 
 # simpler start bench scenarios
 wdis
 
 # concrete case
-player = 'sony-michel'
+player = 'clyde-edwards-helaire'
 [x for x in wdis if x != player]
 
 # want that in a dict:
 {'starter': player, 'bench': [x for x in wdis if x != player]}
 
+[{'starter': player, 'bench': [x for x in wdis if x != player] }
+    for player in wdis]
+
 # start with table of sum stats
 df = pd.concat([sumstats(player) for player in wdis], axis=1)
 
 df = df.T
+
+df.head()
 
 # now let's go through and add all our extra data to it
 # start with win prob
@@ -230,13 +252,14 @@ df.head()
 # note, skipping separate step above and just putting it in the dataframe all
 # at once
 df['wrong'] = [wrong_prob(scen['starter'], scen['bench']) for scen in scenarios]
+df.head()
 
 # now regret prob
 # this time: ** trick, can p
 df['regret'] = [regret_prob(**scen) for scen in scenarios]
 
 # final result:
-df
+df.round(2)
 
 def wdis_plus(sims, team1, team2, wdis):
 
@@ -298,25 +321,32 @@ wdis_plus(sims, team1, team2, wdis)
 
 # now lets use our new function to analyze every kicker on waivers
 
-fa_kickers = ['aldrick-rosas', 'austin-seibert', 'cairo-santos',
-              'zane-gonzalez', 'chris-boswell', 'kaare-vedvik',
-              'eddy-pineiro', 'daniel-carlson', 'dustin-hopkins']
+fa_kickers = ['jake-elliott', 'tristan-vizcaino', 'josh-lambo', 'greg-joseph',
+    'evan-mcpherson', 'chase-mclaughlin', 'ryan-santoso', 'aldrick-rosas',
+    'jason-sanders', 'daniel-carlson', 'matt-ammendola', 'rodrigo-blankenship',
+    'brandon-mcmanus', 'joey-slye', 'graham-gano', 'quinn-nordin', 'nick-folk',
+    'cairo-santos']
 
-k_sims = get_sims(token, fa_kickers, week=WEEK, season=SEASON, nsims=1000,
-                      **SCORING)
+if USE_SAVED_DATA:
+    k_sims = pd.read_csv(path.join('projects', 'wdis', 'data', 'k_sims.csv'))
+else:
+    k_sims = get_sims(token, fa_kickers, week=WEEK, season=SEASON, nsims=1000,
+                          **SCORING)
 
 sims_plus = pd.concat([sims, k_sims], axis=1)
 
-wdis_k = fa_kickers + ['matt-prater']
+wdis_k = fa_kickers + ['jason-myers']
 
 df_k = wdis_plus(sims_plus, team1, team2, wdis_k)
+df_k
 
 ############################
-# now let's do some plotting
+# Plotting
 ############################
 
 points_wide = pd.concat(
     [sims[team1].sum(axis=1), sims[team2].sum(axis=1)], axis=1)
+
 points_wide.columns = ['team1', 'team2']
 points_wide.head()
 
@@ -331,17 +361,10 @@ g = g.map(sns.kdeplot, 'points', shade=True)
 g.add_legend()
 g.fig.subplots_adjust(top=0.9)
 g.fig.suptitle('Team Fantasy Points Distributions')
-g.fig.savefig(path.join(OUTPUT_PATH, 'wdis', 'wdis_dist_by_team1.png'),
+g.fig.savefig(path.join('projects', 'wdis', 'plots', 'wdis_dist_by_team1.png'),
               bbox_inches='tight', dpi=500)
 
-
 # all players
-
-current_starter = 'sony-michel'
-bench_options = ['lesean-mccoy', 'phillip-lindsay', 'royce-freeman']
-team1_sans_starter = [x for x in team1 if (x != current_starter) and x not in
-                      bench_options]
-
 points_wide = pd.concat(
     [sims[team1_sans_starter].sum(axis=1) + sims[player] for player in wdis], axis=1)
 points_wide.columns = wdis
@@ -353,14 +376,14 @@ points_wide.head()
 points_long = points_wide.stack().reset_index()
 points_long.columns = ['sim', 'team', 'points']
 
-points_long.head()
+points_long.head(10)
 
 g = sns.FacetGrid(points_long, hue='team', aspect=2)
 g = g.map(sns.kdeplot, 'points', shade=True)
 g.add_legend()
 g.fig.subplots_adjust(top=0.9)
 g.fig.suptitle('Team Fantasy Points Distributions - WDIS Options')
-g.fig.savefig(path.join(OUTPUT_PATH,'wdis', 'wdis_dist_by_team2.png'),
+g.fig.savefig(path.join('projects', 'wdis', 'plots', 'wdis_dist_by_team2.png'),
               bbox_inches='tight', dpi=500)
 
 def wdis_plot(sims, team1, team2, wdis):
@@ -409,5 +432,5 @@ g = g.map(sns.kdeplot, 'points', shade=True)
 g.add_legend()
 g.fig.subplots_adjust(top=0.9)
 g.fig.suptitle(f'WDIS Projections')
-g.fig.savefig(path.join(OUTPUT_PATH, 'wdis', f'player_wdis_dist_{WEEK}.png'),
+g.fig.savefig(path.join('projects', 'wdis', 'plots', 'player_wdis_dist.png'),
               bbox_inches='tight', dpi=500)
