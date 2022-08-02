@@ -32,6 +32,9 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.7.0 
+First project is live. Updated `intro.py` to use (optional) snapshot of data.
+
 ### v0.6.0 
 Initial 2022 version. Includes through an introduction to the data. Projects
 coming soon.
