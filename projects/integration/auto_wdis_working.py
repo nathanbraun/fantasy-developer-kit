@@ -106,6 +106,8 @@ available_players = pd.read_csv('./projects/integration/raw/wdis/available_playe
 # snapshot:
 sims = pd.read_csv('./projects/integration/raw/wdis/sims.csv')
 
+sims[['sterling-shepard', 'jalen-hurts']]
+
 players_w_pts = players_to_sim.query("actual.notnull()")
 for player, pts in zip(players_w_pts['fantasymath_id'], players_w_pts['actual']):
     sims[player] = pts

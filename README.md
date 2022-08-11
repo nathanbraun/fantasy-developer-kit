@@ -32,6 +32,12 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.8.0 
+League integration project is live and works with sample/example data. So you
+should be able to follow along and do everything even if your own league hasn't
+drafted yet. Once you work through it + draft, can update the tools to analyze
+your own league.
+
 ### v0.7.0 
 First project is live. Updated `intro.py` to use (optional) snapshot of data.
 
