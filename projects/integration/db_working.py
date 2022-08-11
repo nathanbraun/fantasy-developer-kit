@@ -7,8 +7,8 @@ from utilities import DB_PATH
 LEAGUE_ID = 316893
 TEAM_ID = 1605156
 
-teams = site.get_teams_in_league(LEAGUE_ID)
-schedule = site.get_league_schedule(LEAGUE_ID)
+teams = site.get_teams_in_league(LEAGUE_ID, example=True)
+schedule = site.get_league_schedule(LEAGUE_ID, example=True)
 
 # conn
 conn = sqlite3.connect(DB_PATH)

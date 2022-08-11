@@ -1,4 +1,5 @@
 import requests
+import json
 import numpy as np
 from pandas import DataFrame, Series
 import pandas as pd
@@ -19,16 +20,23 @@ def get_league_rosters(lookup, league_id, week):
                                       settings_json['roster_positions']) for x
                       in matchup_json], ignore_index=True)
 
-def get_teams_in_league(league_id):
+def get_teams_in_league(league_id, example=False):
     teams_url = f'https://api.sleeper.app/v1/league/{league_id}/users'
-    teams_json = requests.get(teams_url).json()
+    if example:
+        with open('./projects/integration/raw/sleeper/teams.json') as f:
+            teams_json = json.load(f)
+    else:
+        teams_json = requests.get(teams_url).json()
 
     all_teams = DataFrame(
         [_proc_team(team, i) for i, team in enumerate(teams_json, start=1)])
     all_teams['league_id'] = league_id
     return all_teams
 
-def get_league_schedule(league_id):
+def get_league_schedule(league_id, example=False):
+    if example:
+        return pd.read_csv('./projects/integration/raw/sleeper/schedule.csv')
+
     settings_url = f'https://api.sleeper.app/v1/league/{league_id}'
     settings_json = requests.get(settings_url).json()
 

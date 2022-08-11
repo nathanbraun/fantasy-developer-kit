@@ -1,4 +1,5 @@
 import requests
+import json
 from pandas import DataFrame, Series
 import pandas as pd
 from utilities import (LICENSE_KEY, generate_token, master_player_lookup, SWID,
@@ -11,7 +12,7 @@ pd.options.mode.chained_assignment = None
 ######################
 
 def get_league_rosters(lookup, league_id, week=None):
-    roster_url = ('https://fantasy.espn.com/apis/v3/games/ffl/seasons/2021' +
+    roster_url = ('https://fantasy.espn.com/apis/v3/games/ffl/seasons/2022' +
                   f'/segments/0/leagues/{league_id}?view=mRoster')
 
     roster_json = requests.get(roster_url,
@@ -21,7 +22,7 @@ def get_league_rosters(lookup, league_id, week=None):
                             ignore_index=True)
 
     # score part
-    boxscore_url = ('https://fantasy.espn.com/apis/v3/games/ffl/seasons/2021' +
+    boxscore_url = ('https://fantasy.espn.com/apis/v3/games/ffl/seasons/2022' +
                     f'/segments/0/leagues/{league_id}?view=mBoxscore')
     boxscore_json = requests.get(boxscore_url, cookies={'swid': SWID, 'espn_s2':
                                                         ESPN_S2}).json()
@@ -36,12 +37,16 @@ def get_league_rosters(lookup, league_id, week=None):
 
     return all_rosters_w_id
 
-def get_teams_in_league(league_id):
-    teams_url = ('https://fantasy.espn.com/apis/v3/games/ffl/seasons/2021' +
+def get_teams_in_league(league_id, example=False):
+    teams_url = ('https://fantasy.espn.com/apis/v3/games/ffl/seasons/2022' +
                 f'/segments/0/leagues/{league_id}?view=mTeam')
 
-    teams_json = requests.get(teams_url, cookies={'swid': SWID, 'espn_s2':
-                                                  ESPN_S2}).json()
+    if example:
+        with open('./projects/integration/raw/espn/teams.json') as f:
+            teams_json = json.load(f)
+    else:
+        teams_json = requests.get(teams_url, cookies={'swid': SWID, 'espn_s2':
+                                                      ESPN_S2}).json()
     teams_list = teams_json['teams']
     members_list = teams_json['members']
 
@@ -53,16 +58,20 @@ def get_teams_in_league(league_id):
 
     return comb
 
-def get_league_schedule(league_id):
-    schedule_url = f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/2021/segments/0/leagues/{league_id}?view=mBoxscore'
+def get_league_schedule(league_id, example=False):
+    schedule_url = f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/2022/segments/0/leagues/{league_id}?view=mBoxscore'
 
-    schedule_json = requests.get(schedule_url, cookies={'swid': SWID, 'espn_s2':
-                                                        ESPN_S2}).json()
+    if example:
+        with open('./projects/integration/raw/espn/schedule.json') as f:
+            schedule_json = json.load(f)
+    else:
+        schedule_json = requests.get(schedule_url, cookies={'swid': SWID, 'espn_s2':
+                                                            ESPN_S2}).json()
     matchup_list = schedule_json['schedule']
 
     matchup_df = DataFrame([_process_matchup(matchup) for matchup in matchup_list])
     matchup_df['league_id'] = league_id
-    matchup_df['season'] = 2021
+    matchup_df['season'] = 2022
     matchup_df.rename(columns={'home_id': 'team1_id', 'away_id': 'team2_id'},
                       inplace=True)
     return matchup_df

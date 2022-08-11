@@ -3,6 +3,7 @@ from pandas import DataFrame, Series
 import pandas as pd
 from utilities import (LICENSE_KEY, generate_token, master_player_lookup)
 import numpy as np
+import json
 
 pd.options.mode.chained_assignment = None
 
@@ -18,19 +19,26 @@ def get_league_rosters(lookup, league_id, week=None):
         ignore_index=True)
     return league_rosters
 
-def get_teams_in_league(league_id):
+def get_teams_in_league(league_id, example=False):
     teams_url = ('https://www.fleaflicker.com/api/FetchLeagueStandings?' +
                 f'leagueId={league_id}')
 
-    teams_json = requests.get(teams_url).json()
+    if example:
+        with open('./projects/integration/raw/fleaflicker/teams.json') as f:
+            teams_json = json.load(f)
+    else:
+        teams_json = requests.get(teams_url).json()
 
     teams_df = _divs_from_league(teams_json['divisions'])
     teams_df['league_id'] = league_id
     return teams_df
 
-def get_league_schedule(league_id):
-    return pd.concat([_get_schedule_by_week(league_id, week) for week in
-                      range(1, 15)], ignore_index=True)
+def get_league_schedule(league_id, example=False):
+    if example:
+        return pd.read_csv('./projects/integration/raw/fleaflicker/schedule.csv')
+    else:
+        return pd.concat([_get_schedule_by_week(league_id, week) for week in
+                          range(1, 15)], ignore_index=True)
 
 ##################
 # helper functions
