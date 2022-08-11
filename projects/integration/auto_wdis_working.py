@@ -11,28 +11,22 @@ LEAGUE_ID = 316893
 WEEK = 2
 
 # open up our database connection
-conn = sqlite3.connect(DB_PATH)
+# conn = sqlite3.connect(DB_PATH)  # real path to db
+
+# path to example db i've populated already
+conn = sqlite3.connect('./projects/integration/raw/wdis/fantasy.sqlite')
 
 #######################################
 # load team and schedule data from DB
 #######################################
 
 ###############################################################################
-# normally: run this - AFTER you've run ./hosts/league_setup.py w/ your league
+# note: need to run ./hosts/league_setup.py before using w/ your league
 ###############################################################################
 
-# teams = db.read_league('teams', LEAGUE_ID, conn)
-# schedule = db.read_league('schedule', LEAGUE_ID, conn)
-# league = db.read_league('league', LEAGUE_ID, conn)
-# host = league.iloc[0]['host']
-
-###############################################################################
-# but for this example, using outputs i've saved here
-###############################################################################
-
-teams = pd.read_csv('./projects/integration/raw/wdis/teams.csv')
-schedule = pd.read_csv('./projects/integration/raw/wdis/schedule.csv')
-league = pd.read_csv('./projects/integration/raw/wdis/league.csv')
+teams = db.read_league('teams', LEAGUE_ID, conn)
+schedule = db.read_league('schedule', LEAGUE_ID, conn)
+league = db.read_league('league', LEAGUE_ID, conn)
 host = league.iloc[0]['host']
 
 # get parameters from league DataFrame
@@ -48,12 +42,14 @@ SCORING['dst'] = league.iloc[0]['dst_scoring']
 ################################
 
 # need players from FM API
+
+# normally run this:
 token = generate_token(LICENSE_KEY)['token']
-player_lookup = master_player_lookup(token).query("fleaflicker_id.notnull()")
-
-player_lookup = pd.read_csv('./projects/integration/raw/wdis/player_lookup.csv')
-
+# player_lookup = master_player_lookup(token).query("fleaflicker_id.notnull()")
 # rosters = site.get_league_rosters(player_lookup, LEAGUE_ID, WEEK)
+
+# but here we're using snapshot
+player_lookup = pd.read_csv('./projects/integration/raw/wdis/player_lookup.csv')
 rosters = pd.read_csv('./projects/integration/raw/wdis/rosters.csv')
 
 # what we need for wdis:
@@ -93,15 +89,22 @@ players_to_sim = pd.concat([
     opponent_starters])
 
 # sims
+# normally:
 # available_players = get_players(token, season=2021, week=WEEK, **SCORING)
+
+# snapshot:
 available_players = pd.read_csv('./projects/integration/raw/wdis/available_players.csv')
 
 # now get sims
 # easiest to just get sims for every player on our team
 
-sims = get_sims(token, set(players_to_sim['fantasymath_id'])  &
-                set(available_players['fantasymath_id']), season=2021,
-                week=WEEK, nsims=1000, **SCORING)
+# normally:
+# sims = get_sims(token, set(players_to_sim['fantasymath_id'])  &
+#                 set(available_players['fantasymath_id']), season=2021,
+#                 week=WEEK, nsims=1000, **SCORING)
+
+# snapshot:
+sims = pd.read_csv('./projects/integration/raw/wdis/sims.csv')
 
 players_w_pts = players_to_sim.query("actual.notnull()")
 for player, pts in zip(players_w_pts['fantasymath_id'], players_w_pts['actual']):
@@ -180,7 +183,7 @@ df_flex = wdis.calculate(sims, current_starters,
 
 df_flex
 
-# nwo put all this in a function
+# now put all this in a function
 def wdis_by_pos1(pos, sims, roster, opp_starters):
     wdis_options = wdis_options_by_pos(roster, pos)
 
@@ -194,7 +197,8 @@ def wdis_by_pos1(pos, sims, roster, opp_starters):
 wdis_by_pos1('QB', sims, roster, opponent_starters['fantasymath_id'])
 wdis_by_pos1('RB/WR/TE', sims, roster, opponent_starters['fantasymath_id'])
 
-positions = list(roster.loc[roster['start'] & roster['fantasymath_id'].notnull(), 'team_position'])
+positions = list(roster.loc[roster['start'] &
+                     roster['fantasymath_id'].notnull(), 'team_position'])
 positions
 
 def positions_from_roster(roster):

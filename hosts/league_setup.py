@@ -4,12 +4,20 @@ from pandas import DataFrame
 import sqlite3
 from utilities import DB_PATH
 
-LEAGUE_ID = 34958
-TEAM_ID = 217960
+#########################################
+# update all this for your league
+# need to do for EVERY league you analyze
+#########################################
+LEAGUE_ID = 0  
+TEAM_ID = 0  
 
 LEAGUE_NAME = "Family League"
 HOST = 'fleaflicker'
-SCORING = {'qb': 'pass6', 'skill': 'ppr', 'dst': 'high'}
+SCORING = {'qb': 'pass4', 'skill': 'ppr0', 'dst': 'mfl'}
+
+##################################################
+# shouldn't have to change anything from here down
+##################################################
 
 # open up our database connection
 conn = sqlite3.connect(DB_PATH)
