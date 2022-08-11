@@ -47,17 +47,10 @@ def process_player1(slot):
 process_player1(starter_slot0)
 
 [process_player1(player) for player in list_of_starter_slots]
-# [process_player1(player) for player in list_of_bench_slots]  # error
+[process_player1(player) for player in list_of_bench_slots]  
 
-qb_data_raw = roster_json['groups'][0]['slots'][0]
-
-process_player1(qb_data_raw)
-
-# error - what's happening?
-# i had an open spot on my bench (put a guy on IR and didn't pick someone else
-# up yet), so there's no league player there
-
-# now we need to modify process_player1 to handle that
+# to modify process_player1 to handle situations where leaguePlayer isn't in
+# dict
 def process_player2(slot):
     dict_to_return = {}
 
@@ -72,9 +65,13 @@ def process_player2(slot):
         fleaflicker_position_dict = slot['position']
 
         dict_to_return['team_position'] = fleaflicker_position_dict['label']
-        return dict_to_return
+
+    return dict_to_return
 
 [process_player2(x) for x in list_of_starter_slots]
+
+starter_df1 = DataFrame([process_player2(x) for x in list_of_starter_slots])
+starter_df1
 
 def process_player3(slot):
     dict_to_return = {}
@@ -97,7 +94,8 @@ def process_player3(slot):
         fleaflicker_position_dict = slot['position']
 
         dict_to_return['team_position'] = fleaflicker_position_dict['label']
-        return dict_to_return
+
+    return dict_to_return
 
 # list of dicts: put in DataFrame
 starter_df1 = DataFrame([process_player3(x) for x in list_of_starter_slots])
@@ -166,7 +164,8 @@ def get_team_roster(team_id, league_id, lookup):
     roster_url = ('https://www.fleaflicker.com/api/FetchRoster?' +
         f'leagueId={league_id}&teamId={team_id}')
 
-    roster_json = requests.get(roster_url).json()
+    with open('./projects/integration/raw/fleaflicker/roster.json') as f:
+        roster_json = json.load(f)
 
     starter_slots = roster_json['groups'][0]['slots']
     bench_slots = roster_json['groups'][1]['slots']
@@ -240,7 +239,9 @@ def get_teams_in_league(league_id):
     teams_url = ('https://www.fleaflicker.com/api/FetchLeagueStandings?' +
                 f'leagueId={league_id}')
 
-    teams_json = requests.get(teams_url).json()
+    # teams_json = requests.get(teams_url).json()
+    with open('./projects/integration/raw/fleaflicker/teams.json') as f:
+        teams_json = json.load(f)
 
     teams_df = divs_from_league(teams_json['divisions'])
     teams_df['league_id'] = league_id
@@ -303,7 +304,9 @@ def get_schedule_by_week(league_id, week):
         'https://www.fleaflicker.com/api/FetchLeagueScoreboard?' +
         f'leagueId={LEAGUE_ID}&scoringPeriod={WEEK}&season=2021')
 
-    schedule_json = requests.get(schedule_url).json()
+    # schedule_json = requests.get(schedule_url).json()
+    with open('./projects/integration/raw/fleaflicker/schedule.json') as f:
+        schedule_json = json.load(f)
 
     matchup_df = DataFrame([process_matchup(x) for x in schedule_json['games']])
     matchup_df['season'] = 2021

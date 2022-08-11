@@ -25,16 +25,21 @@ team9['starters']
 settings_url = f'https://api.sleeper.app/v1/league/{LEAGUE_ID}'
 settings_json = requests.get(settings_url).json()
 
+with open('./projects/integration/raw/sleeper/settings.json') as f:
+    settings_json = json.load(f)
+
 positions = settings_json['roster_positions']
 
 from utilities import (LICENSE_KEY, generate_token, master_player_lookup)
 token = generate_token(LICENSE_KEY)['token']
+
 fantasymath_players = master_player_lookup(token)
 
-fantasymath_players.head()
+fantasymath_players = pd.read_csv('./projects/integration/raw/sleeper/lookup.csv')
 
 starters9 = Series(team9['starters']).to_frame('sleeper_id')
 starters9
+type(starters9)
 
 DataFrame([{'sleeper_id': x} for x in team9['starters']])
 
@@ -48,6 +53,8 @@ starters9_w_info
 
 starters9_w_info.loc[starters9_w_info['actual'] == 0, 'actual'] = np.nan
 starters9_w_info
+
+positions
 
 starters9_w_info['team_position'] = [x for x in positions if x != 'BN']
 starters9_w_info
@@ -75,7 +82,7 @@ players9_w_info = pd.merge(players9, fantasymath_players, how='left')
 team9['players_points']
 
 players9_w_info['actual'] = (
-    players9_w_info['sleeper_id'].replace(team9['players_points']))
+    players9_w_info['sleeper_id'].apply(lambda x: team9['players_points'][x]))
 
 bench_players = set(team9['players']) - set(team9['starters'])
 
@@ -146,9 +153,6 @@ league_rosters = get_league_rosters(fantasymath_players, LEAGUE_ID, 2)
 # team info
 teams_url = f'https://api.sleeper.app/v1/league/{LEAGUE_ID}/users'
 teams_json = requests.get(teams_url).json()
-
-with open('./projects/integration/raw/sleeper/teams.json', 'w') as f:
-    json.dump(teams_json, f)
 
 with open('./projects/integration/raw/sleeper/teams.json') as f:
     teams_json = json.load(f)
@@ -223,7 +227,12 @@ schedule_w2_wide
 
 def get_schedule_by_week(league_id, week):
     matchup_url = f'https://api.sleeper.app/v1/league/{league_id}/matchups/{week}'
+
     matchup_json = requests.get(matchup_url).json()
+
+    # uncomment this to use saved snapshot
+    # with open('./projects/integration/raw/sleeper/matchup.json') as f:
+    #     matchup_json = json.load(f)
 
     team_sched = DataFrame([proc_team_schedule(team) for team in matchup_json])
 

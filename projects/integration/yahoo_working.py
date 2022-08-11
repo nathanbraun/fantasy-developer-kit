@@ -13,7 +13,7 @@ if not Path(YAHOO_FILE).exists():
         'consumer_key': YAHOO_KEY,
         'consumer_secret': YAHOO_SECRET,
     }
-    with open(YAHOO_FILE) as f:
+    with open(YAHOO_FILE, 'w') as f:
         json.dump(yahoo_credentials_dict, f)
 
 OAUTH = OAuth2(None, None, from_file=YAHOO_FILE)
@@ -47,6 +47,7 @@ players_dict = (
 players_dict.keys()
 
 player0 = players_dict['0']  # josh allen
+player0
 
 def player_list_to_dict(player):
     player_info = player['player'][0]
@@ -54,7 +55,7 @@ def player_list_to_dict(player):
     player_info_dict = {}
     for x in player_info:
         if (type(x) is dict) and (len(x.keys()) == 1):
-                for key in x.keys():  # tricky way to get access to key
+                for key in x.keys():  
                     player_info_dict[key] = x[key]
     return player_info_dict
 
@@ -140,6 +141,7 @@ def process_roster(team):
 
 roster_df = process_roster(roster_json['fantasy_content']['team'])
 
+# get actual points
 points_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
                 f'team/406.l.{LEAGUE_ID}.t.{TEAM_ID}' +
             "/players;out=metadata,stats,ownership,percent_owned,draft_analysis")
