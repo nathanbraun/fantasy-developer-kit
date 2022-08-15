@@ -1,9 +1,12 @@
 from pandas import DataFrame, Series
+import os
+from textwrap import dedent
 import pandas as pd
 import json
 from textwrap import dedent
 import requests
 from configparser import ConfigParser
+from pathlib import Path
 
 config = ConfigParser(interpolation=None)
 config.read('config.ini')
@@ -17,6 +20,19 @@ config.read('config.ini')
 # constants - mostly loaded from config.ini - shouldn't need to change
 # if not working make sure you have config.ini set up
 API_URL = 'https://api.sims.fantasymath.com'
+
+if not Path('config.ini').is_file():
+    print(dedent(f"""
+    You don't have config.ini in your current working directory.
+
+    See the Prerequisites: Tooling section of the book.
+
+    Your current working directory is:
+    {os.getcwd()}
+
+    And the files in it are:
+    {os.listdir()}
+    """))
 
 LICENSE_KEY = config['sdk']['LICENSE_KEY']
 OUTPUT_PATH = config['sdk']['OUTPUT_PATH']

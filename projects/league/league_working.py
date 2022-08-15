@@ -15,16 +15,22 @@ from utilities import (get_sims, generate_token, LICENSE_KEY, DB_PATH,
 LEAGUE_ID = 316893
 WEEK = 2
 
-# first: get league data from DB + roster data by connecting to site
-conn = sqlite3.connect(DB_PATH)
+# open up our database connection
+# conn = sqlite3.connect(DB_PATH)  # real path to db
 
-# teams = db.read_league('teams', LEAGUE_ID, conn)
-# schedule = db.read_league('schedule', LEAGUE_ID, conn)
-# league = db.read_league('league', LEAGUE_ID, conn)
+conn = sqlite3.connect('./projects/integration/raw/wdis/fantasy.sqlite')
 
-teams = pd.read_csv('./projects/league/raw/teams.csv')
-schedule = pd.read_csv('./projects/league/raw/schedule.csv')
-league = pd.read_csv('./projects/league/raw/league.csv')
+#######################################
+# load team and schedule data from DB
+#######################################
+
+###############################################################################
+# note: need to run ./hosts/league_setup.py before using w/ your league
+###############################################################################
+
+teams = db.read_league('teams', LEAGUE_ID, conn)
+schedule = db.read_league('schedule', LEAGUE_ID, conn)
+league = db.read_league('league', LEAGUE_ID, conn)
 
 # set other parameters
 TEAM_ID = league.iloc[0]['team_id']
@@ -34,26 +40,52 @@ SCORING['qb'] = league.iloc[0]['qb_scoring']
 SCORING['skill'] = league.iloc[0]['skill_scoring']
 SCORING['dst'] = league.iloc[0]['dst_scoring']
 
+##############
 # then rosters
+##############
+
+# normally:
+
 token = generate_token(LICENSE_KEY)['token']
 # player_lookup = master_player_lookup(token)
-
 # rosters = (site.get_league_rosters(player_lookup, LEAGUE_ID)
 #            .query("start"))
 
+# for walkthrough:
 player_lookup = pd.read_csv('./projects/league/raw/player_lookup.csv')
 rosters = pd.read_csv('./projects/league/raw/rosters.csv').query("start")
 
-# making sure we query only valid players
-available_players = get_players(token, week=WEEK, season=2021, **SCORING)
+# normally:
+# available_players = get_players(token, week=WEEK, season=2021, **SCORING)
+# sims = get_sims(token, (set(rosters['fantasymath_id']) &
+#                  set(available_players['fantasymath_id'])),
+#                 week=WEEK, season=2021, nsims=1000, **SCORING)
 
-sims = get_sims(token, (set(rosters['fantasymath_id']) &
-                 set(available_players['fantasymath_id'])),
-                week=WEEK, season=2021, nsims=1000, **SCORING)
+# for walkthrough:
+sims = pd.read_csv('./projects/league/raw/sims.csv')
 
-players_w_pts = rosters.query("actual.notnull()")
-for player, pts in zip(players_w_pts['fantasymath_id'], players_w_pts['actual']):
+sims[['terry-mclaurin', 'sterling-shepard', 'antonio-gibson', 'was-dst',
+    'logan-thomas']].head()
+sims[['terry-mclaurin', 'sterling-shepard', 'antonio-gibson', 'was-dst',
+    'logan-thomas']].describe().round(2)
+
+players_w_pts = rosters.loc[rosters['actual'].notnull(), ['fantasymath_id', 'actual']]
+
+(sims['sterling-shepard'] <= 8.5).mean()
+
+percentiles = [(sims[player] <= pts).mean() for player, pts in
+    zip(players_w_pts['fantasymath_id'], players_w_pts['actual'])]
+
+players_w_pts['pctile'] = percentiles
+players_w_pts
+
+players_w_pts['pctile'].mean()
+
+for player, pts in zip(players_w_pts['fantasymath_id'],
+                       players_w_pts['actual']):
     sims[player] = pts
+
+sims[['patrick-mahomes', 'davante-adams', 'sterling-shepard']].head(5)
 
 ########################################################
 # load weekly lineup, matchup info
@@ -77,6 +109,8 @@ team1_pts = sims[team1_roster].sum(axis=1)
 
 team2_roster = lineup_by_team(team2)
 team2_pts = sims[team2_roster].sum(axis=1)
+
+pd.concat([team1_pts, team2_pts], axis=1).head(10)
 
 team1_wp = (team1_pts > team2_pts).mean()
 team1_wp
@@ -272,6 +306,8 @@ team_id = 1605156
 
 totals_by_team.head()
 
+totals_by_team.shape
+
 totals_by_team.max(axis=1).head()
 
 # then apply idxmax(axis=1) <- finds the name of column with the max, and
@@ -373,8 +409,8 @@ g = g.map(sns.kdeplot, 'pts', shade=True)
 g.add_legend()
 g.fig.subplots_adjust(top=0.9)
 g.fig.suptitle(f'Team Points Distributions - Week {WEEK}')
-# g.fig.savefig(path.join(league_wk_output_dir, f'team_dist_overlap.png'),
-#               bbox_inches='tight', dpi=500)
+g.fig.savefig(path.join(league_wk_output_dir, f'team_dist_overlap.png'),
+              bbox_inches='tight', dpi=500)
 
 # add in matchup info
 
@@ -391,8 +427,8 @@ g = g.map(sns.kdeplot, 'pts', shade=True)
 g.add_legend()
 g.fig.subplots_adjust(top=0.9)
 g.fig.suptitle(f'Team Points Distributions by Matchup 1 - Week {WEEK}')
-# g.fig.savefig(path.join(league_wk_output_dir, 'team_dist_by_matchup1.png'),
-#               bbox_inches='tight', dpi=500)
+g.fig.savefig(path.join(league_wk_output_dir, 'team_dist_by_matchup1.png'),
+              bbox_inches='tight', dpi=500)
 
 # fine but matchup_id kind of lame
 # let's get a description
@@ -414,5 +450,5 @@ g = g.map(sns.kdeplot, 'pts', shade=True)
 g.add_legend()
 g.fig.subplots_adjust(top=0.9)
 g.fig.suptitle(f'Team Points Distributions by Matchup 2 - Week {WEEK}')
-# g.fig.savefig(path.join(league_wk_output_dir, 'team_dist_by_matchup2.png'),
-#               bbox_inches='tight', dpi=500)
+g.fig.savefig(path.join(league_wk_output_dir, 'team_dist_by_matchup2.png'),
+              bbox_inches='tight', dpi=500)

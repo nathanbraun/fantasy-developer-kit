@@ -27,11 +27,11 @@ conn = sqlite3.connect('./projects/integration/raw/wdis/fantasy.sqlite')
 teams = db.read_league('teams', LEAGUE_ID, conn)
 schedule = db.read_league('schedule', LEAGUE_ID, conn)
 league = db.read_league('league', LEAGUE_ID, conn)
-host = league.iloc[0]['host']
 
 # get parameters from league DataFrame
 
 TEAM_ID = league.iloc[0]['team_id']
+HOST = league.iloc[0]['host']
 SCORING = {}
 SCORING['qb'] = league.iloc[0]['qb_scoring']
 SCORING['skill'] = league.iloc[0]['skill_scoring']
@@ -266,7 +266,7 @@ from pathlib import Path
 from os import path
 
 league_wk_output_dir = path.join(
-    OUTPUT_PATH, f'{host}_{LEAGUE_ID}_2021-{str(WEEK).zfill(2)}')
+    OUTPUT_PATH, f'{HOST}_{LEAGUE_ID}_2021-{str(WEEK).zfill(2)}')
 
 Path(league_wk_output_dir).mkdir(exist_ok=True)
 

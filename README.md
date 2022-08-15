@@ -32,7 +32,13 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
-### v0.8.0 
+### v0.9.0
+League analysis project is live and works with sample/example data.
+
+### v0.8.1
+Add automatic check for `config.ini`.
+
+### v0.8.0
 League integration project is live and works with sample/example data. So you
 should be able to follow along and do everything even if your own league hasn't
 drafted yet. Once you work through it + draft, can update the tools to analyze
