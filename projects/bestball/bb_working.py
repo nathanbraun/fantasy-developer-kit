@@ -10,18 +10,24 @@ SEASON = 2019
 SCORING = {'qb': 'pass4', 'skill': 'ppr', 'dst': 'mfl'}
 
 roster = Series(['drew-brees', 'baker-mayfield', 'malcolm-brown',
-                 'ezekiel-elliott', 'nyheim-hines', 'kareem-hunt',
-                 'marlon-mack', 'devin-singletary', 'james-white',
-                 'mike-evans', 'marquise-goodwin', 'mecole-hardman',
-                 'christian-kirk', 'anthony-miller', 'dj-moore',
-                 'curtis-samuel', 'noah-fant', 'george-kittle', 'cin-dst',
-                 'den-dst']).to_frame('fantasymath_id')
+                 'ezekiel-elliott', 'nyheim-hines', 'marlon-mack',
+                    'devin-singletary', 'james-white', 'mike-evans',
+                    'marquise-goodwin', 'mecole-hardman', 'christian-kirk',
+                    'anthony-miller', 'dj-moore', 'curtis-samuel', 'noah-fant',
+                    'george-kittle', 'cin-dst',
+                    'den-dst']).to_frame('fantasymath_id')
 
-token = generate_token(LICENSE_KEY)['token']
-sims = get_sims(token, list(roster['fantasymath_id']), week=WEEK,
-                season=SEASON, nsims=1000, **SCORING)
+# token = generate_token(LICENSE_KEY)['token']
 
-players = get_players(token, week=WEEK, season=SEASON, **SCORING)
+# normally:
+# sims = get_sims(token, list(roster['fantasymath_id']), week=WEEK,
+#                 season=SEASON, nsims=1000, **SCORING)
+# players = get_players(token, week=WEEK, season=SEASON, **SCORING)
+
+# for walkthrough:
+sims = pd.read_csv('./projects/bestball/sims.csv')
+players = pd.read_csv('./projects/bestball/players.csv')
+
 roster = pd.merge(roster, players)
 roster.head()
 

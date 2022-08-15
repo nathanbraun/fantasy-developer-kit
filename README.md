@@ -32,6 +32,9 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.10.0
+Best ball project live and works with sample/example data.
+
 ### v0.9.0
 League analysis project is live and works with sample/example data.
 
