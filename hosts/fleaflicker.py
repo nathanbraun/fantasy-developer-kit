@@ -138,12 +138,12 @@ def _process_matchup(game):
 def _get_schedule_by_week(league_id, week):
     schedule_url = (
         'https://www.fleaflicker.com/api/FetchLeagueScoreboard?' +
-        f'leagueId={league_id}&scoringPeriod={week}&season=2021')
+        f'leagueId={league_id}&scoringPeriod={week}&season=2022')
 
     schedule_json = requests.get(schedule_url).json()
 
     matchup_df = DataFrame([_process_matchup(x) for x in schedule_json['games']])
-    matchup_df['season'] = 2021
+    matchup_df['season'] = 2022
     matchup_df['week'] = week
     matchup_df['league_id'] = league_id
     return matchup_df

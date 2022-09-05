@@ -32,6 +32,9 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.11.0
+Added instructions for using the Fantasy Math Web GUI.
+
 ### v0.10.0
 Best ball project live and works with sample/example data.
 
