@@ -120,7 +120,7 @@ def master_player_lookup(token):
 
 
 def get_players(token,  qb='pass6', skill='ppr', dst='high', week=None,
-                      season=2021):
+                      season=2022):
 
     _check_arg('qb scoring', qb, ['pass6', 'pass4'])
     _check_arg('rb/wr/te scoring', skill, ['ppr', 'ppr0'])
@@ -184,7 +184,7 @@ def get_sims(token, players, qb='pass6', skill='ppr', dst='high', week=None,
     # check for valid arguments
     ###########################
     _check_arg('week', week, range(1, 17), none_ok=True)
-    _check_arg('season', season, range(2017, 2022))
+    _check_arg('season', season, range(2017, 2023))
     _check_arg('qb scoring', qb, ['pass6', 'pass4'])
     _check_arg('rb/wr/te scoring', skill, ['ppr', 'ppr0'])
     _check_arg('dst scoring', dst, ['high', 'mfl'])
