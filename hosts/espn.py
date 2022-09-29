@@ -28,6 +28,8 @@ def get_league_rosters(lookup, league_id, week=None):
                                                         ESPN_S2}).json()
     matchup_list = boxscore_json['schedule']
     scores = pd.concat([_proc_played_matchup(x) for x in matchup_list])
+    if scores.empty:
+        scores = DataFrame(columns=['espn_id', 'actual'])
 
     all_rosters = pd.merge(all_rosters, scores, how='left')
 

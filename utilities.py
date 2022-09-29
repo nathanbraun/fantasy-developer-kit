@@ -178,7 +178,7 @@ def _check_arg(name, arg, allowed, none_ok=False):
         raise ValueError(f"Invalid {name} argument. Needs to be in {allowed}.")
 
 def get_sims(token, players, qb='pass6', skill='ppr', dst='high', week=None,
-             season=2021, nsims=100):
+             season=2022, nsims=100):
 
     ###########################
     # check for valid arguments

@@ -197,6 +197,13 @@ matchup_list = [x for x in boxscore_json['schedule'] if x['matchupPeriodId'] == 
 scores = pd.concat([proc_played_matchup(x) for x in matchup_list])
 scores
 
+# fix:
+# doesn't work if scores is empty (e.g. it's tue-wed and no one has played yet)
+# so in that case make an empty dataframe
+if scores.empty:
+    scores = DataFrame(columns=['espn_id', 'actual'])
+
+
 all_rosters_w_pts = pd.merge(all_rosters, scores, how='left')
 
 # fantasy math id

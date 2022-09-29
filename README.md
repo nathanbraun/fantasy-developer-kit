@@ -32,6 +32,13 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.12.1 (2022-09-29)
+Fix bug in ESPN where things were failing if people hadn't played yet (thanks
+Graydon!)
+
+### v0.12.0
+Allow year to be 2022.
+
 ### v0.11.0
 Added instructions for using the Fantasy Math Web GUI.
 
