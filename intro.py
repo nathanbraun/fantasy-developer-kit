@@ -1,26 +1,28 @@
 import pandas as pd
 from os import path
-from utilities import LICENSE_KEY, generate_token, get_players, get_sims
+from utilities import (LICENSE_KEY, generate_token, get_players, get_sims,
+    name_sims)
 
 # parameters
-SEASON = 2021
+SEASON = 2022
 WEEK = 1
-SCORING = {'qb': 'pass4', 'skill': 'ppr', 'dst': 'mfl'}
+SCORING = {'qb': 'pass_4', 'skill': 'ppr_1', 'dst': 'dst_std'}
 
 # get an access token
 token = generate_token(LICENSE_KEY)['token']
+
+players = get_players(token, season=2022, week=1,
+                      **SCORING).set_index('player_id')
 
 USE_SAVED_DATA = True
 
 # note: **SCORING same as passing qb='pass4', skill='ppr' ... to function
 if USE_SAVED_DATA:
-    players = get_players(token, **SCORING, season=SEASON,
-                          week=WEEK).set_index('fantasymath_id')
-else:
     players = (pd.read_csv(path.join('data', 'players.csv'))
         .set_index('fantasymath_id'))
-
-players.head()
+else:
+    players = get_players(token, **SCORING, season=SEASON,
+                          week=WEEK).set_index('player_id')
 
 # use this list of player ids (players.index) to get all the simulations for
 # this week
@@ -29,51 +31,55 @@ if USE_SAVED_DATA:
     sims = pd.read_csv(path.join('data', 'sims.csv'))
 else:
     sims = get_sims(token, players=list(players.index), week=WEEK, season=SEASON,
-                    nsims=1000, **SCORING)
+                    nsims=500, **SCORING)
 
 sims.head()
 
-sims.shape
+# who is player 165
+players.loc[[165, 172]]
 
-sims['kyler-murray'].mean()
-sims['kyler-murray'].median()
+sims = name_sims(sims, players)
+sims.head()
 
-sims[['kyler-murray', 'patrick-mahomes']].head()
+sims['justin-herbert'].mean()
+sims['justin-herbert'].median()
 
-(sims['kyler-murray'] > sims['patrick-mahomes']).head()
+sims[['justin-herbert', 'patrick-mahomes']].head()
 
-(sims['kyler-murray'] > sims['patrick-mahomes']).mean()
+(sims['justin-herbert'] > sims['patrick-mahomes']).head()
 
-(sims['kyler-murray'] >
+(sims['justin-herbert'] > sims['patrick-mahomes']).mean()
+
+(sims['justin-herbert'] >
          sims[['matthew-stafford', 'russell-wilson']].max(axis=1) + 11.5).mean()
 
-sims['bb_qb'] = sims[['kyler-murray', 'matthew-stafford']].max(axis=1)
-sims[['bb_qb', 'kyler-murray', 'matthew-stafford']].describe()
+sims['bb_qb'] = sims[['justin-herbert', 'matthew-stafford']].max(axis=1)
+sims[['bb_qb', 'justin-herbert', 'matthew-stafford']].describe()
 
-sims['bb_qb2'] = sims[['kyler-murray', 'matthew-stafford',
+sims['bb_qb2'] = sims[['justin-herbert', 'matthew-stafford',
                        'kirk-cousins']].max(axis=1)
-sims[['bb_qb2', 'bb_qb', 'kyler-murray', 'matthew-stafford',
+sims[['bb_qb2', 'bb_qb', 'justin-herbert', 'matthew-stafford',
       'kirk-cousins']].describe().round(2)
 
 # correlations
-sims[['kyler-murray', 'deandre-hopkins']].corr()
+sims[['justin-herbert', 'keenan-allen']].corr()
 
-sims[['kyler-murray', 'ten-dst']].corr()
+sims[['justin-herbert', 'lv']].corr()
 
-sims[['kyler-murray', 'deandre-hopkins', 'ten-dst']].corr()
+sims[['justin-herbert', 'keenan-allen', 'lv']].corr()
 
-(sims[['kyler-murray', 'ryan-tannehill', 'deandre-hopkins', 'aaron-rodgers',
-    'ten-dst']] .corr()
+(sims[['justin-herbert', 'derek-carr', 'keenan-allen', 'aaron-rodgers', 'lv']]
+    .corr()
  .round(2))
 
-sims['deandre-hopkins'].describe()
+sims['keenan-allen'].describe()
 
 pd.concat([
-    sims.loc[sims['kyler-murray'] > 30, 'deandre-hopkins'].describe(),
-    sims.loc[sims['kyler-murray'] < 12, 'deandre-hopkins'].describe()], axis=1)
+    sims.loc[sims['justin-herbert'] > 30, 'keenan-allen'].describe(),
+    sims.loc[sims['justin-herbert'] < 12, 'keenan-allen'].describe()], axis=1)
 
-(sims['aaron-rodgers'] > sims['russell-wilson']).mean()
+(sims['aaron-rodgers'] > sims['matthew-stafford']).mean()
 
-(sims[['aaron-rodgers', 'tyler-lockett']].sum(axis=1) > 60).mean()
+(sims[['aaron-rodgers', 'cooper-kupp']].sum(axis=1) > 50).mean()
 
-(sims[['russell-wilson', 'tyler-lockett']].sum(axis=1) > 60).mean()
+(sims[['matthew-stafford', 'cooper-kupp']].sum(axis=1) > 50).mean()
