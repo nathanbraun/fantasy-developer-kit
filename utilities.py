@@ -97,8 +97,8 @@ def master_player_lookup(token):
     query_players = """
         query {
             players {
-                fantasymath_id,
-                position,
+                player_id,
+                pos,
                 fleaflicker_id,
                 espn_id,
                 yahoo_id,
@@ -119,44 +119,30 @@ def master_player_lookup(token):
         return DataFrame(raw['players'])
 
 
-def get_players(token,  qb='pass6', skill='ppr', dst='high', week=None,
-                      season=2022):
+def get_players(token,  qb='pass_6', skill='ppr_1', dst='dst_std', week=None,
+                season=None):
 
-    _check_arg('qb scoring', qb, ['pass6', 'pass4'])
-    _check_arg('rb/wr/te scoring', skill, ['ppr', 'ppr0'])
-    _check_arg('dst scoring', dst, ['high', 'mfl'])
+    _check_arg('qb scoring', qb, ['pass_6', 'pass_4'])
+    _check_arg('rb/wr/te scoring', skill, ['ppr_1', 'ppr_0', 'ppr_1over2'])
+    _check_arg('dst scoring', dst, ['dst_high', 'dst_std'])
 
+    arg_string = f'qb: "{qb}", skill: "{skill}", dst: "{dst}"'
 
-    arg_string = f'qb: "{qb}", skill: "{skill}", dst: "{dst}", season: {season}'
+    variables = ['player_id', 'name', 'pos', 'fleaflicker_id', 'espn_id',
+                 'yahoo_id', 'sleeper_id']
 
-    if week is not None:
-        arg_string = arg_string + f', week: {week}'
+    if (week is not None) and (season is not None):
+        arg_string = arg_string + f', season: {season}, week: {week}'
+        variables = variables + ['actual']
 
-    if season < 2021:
-        query_available = dedent(
-            f"""
-            query {{
-                available({arg_string}) {{
-                    fantasymath_id,
-                    position,
-                    actual
-                }}
+    query_available = dedent(
+        f"""
+        query {{
+            available({arg_string}) {{
+                {','.join(variables)}
             }}
-            """)
-    else:
-        query_available = dedent(
-            f"""
-            query {{
-                available({arg_string}) {{
-                    fantasymath_id,
-                    position,
-                    fleaflicker_id,
-                    espn_id,
-                    yahoo_id,
-                    sleeper_id
-                }}
-            }}
-            """)
+        }}
+        """)
 
     r = requests.post(API_URL, json={'query': query_available},
                   headers={'Authorization': f'Bearer {token}'})
@@ -177,48 +163,35 @@ def _check_arg(name, arg, allowed, none_ok=False):
     if not ((arg in allowed) or (none_ok and arg is None)):
         raise ValueError(f"Invalid {name} argument. Needs to be in {allowed}.")
 
-def get_sims(token, players, qb='pass6', skill='ppr', dst='high', week=None,
-             season=2022, nsims=100):
+def get_sims(token, players, qb='pass_6', skill='ppr_1', dst='dst_std',
+             nsims=100, week=None, season=None):
 
     ###########################
     # check for valid arguments
     ###########################
-    _check_arg('week', week, range(1, 17), none_ok=True)
-    _check_arg('season', season, range(2017, 2023))
-    _check_arg('qb scoring', qb, ['pass6', 'pass4'])
-    _check_arg('rb/wr/te scoring', skill, ['ppr', 'ppr0'])
-    _check_arg('dst scoring', dst, ['high', 'mfl'])
+    _check_arg('week', week, range(1, 19), none_ok=True)
+    _check_arg('season', season, range(2020, 2024), none_ok=True)
+    _check_arg('qb scoring', qb, ['pass_6', 'pass_4'])
+    _check_arg('rb/wr/te scoring', skill, ['ppr_1', 'ppr_0', 'ppr_1over2'])
+    _check_arg('dst scoring', dst, ['dst_high', 'dst_std'])
 
     player_str = ','.join([f'"{x}"' for x in players])
 
-    if week is None:
-        query = f"""
-            query {{
-                sims(qb: "{qb}", skill: "{skill}", dst: "{dst}", nsims: {nsims},
-                    fantasymath_ids: [{player_str}]) {{
-                    players {{
-                        fantasymath_id
-                        sims
-                    }}
-                }}
-            }}
-            """
-        endpoint = 'sims'
+    arg_string = f'qb: "{qb}", skill: "{skill}", dst: "{dst}", nsims: {nsims}, player_ids: [{player_str}]'
 
-    else:
-        query = f"""
-            query {{
-                historical(week: {week}, season: {season}, qb: "{qb}", skill:
-                    "{skill}", dst: "{dst}", nsims: {nsims},
-                    fantasymath_ids: [{player_str}]) {{
-                    players {{
-                        fantasymath_id
-                        sims
-                    }}
+    if (week is not None) and (season is not None):
+        arg_string = arg_string + f', season: {season}, week: {week}'
+
+    query = f"""
+        query {{
+            sims({arg_string}) {{
+                players {{
+                    player_id
+                    sims
                 }}
             }}
-            """
-        endpoint = 'historical'
+        }}
+        """
 
     # send request
     r = requests.post(API_URL, json={'query': query},
@@ -228,10 +201,18 @@ def get_sims(token, players, qb='pass6', skill='ppr', dst='high', week=None,
     if raw is None:
         print("No data. Check token.")
         return DataFrame()
-    else:
-        return pd.concat([Series(x['sims']).to_frame(x['fantasymath_id']) for x in
-                          raw[endpoint]['players']], axis=1)
 
+    return pd.concat([Series(x['sims']).to_frame(x['player_id']) for x in
+        raw['sims']['players']], axis=1)
+
+
+def name_sims(sims, players):
+    sims = DataFrame(sims, copy=True)
+    sims.columns = list(players.loc[sims.columns, 'name']
+                        .str.lower()
+                        .str.replace('.','')
+                        .str.replace(' ', '-'))
+    return sims
 
 # misc helper
 
@@ -245,16 +226,20 @@ def schedule_long(sched):
 if __name__ == '__main__':
     # generate access token
     token = generate_token(LICENSE_KEY)['token']
+    token
 
     # validate it
     validate(token)
 
+    # GraphQL
     # raw graphql example
+
     QUERY_STR = """
         query {
-            available(week: 1, season: 2020) {
-                fantasymath_id,
-                position,
+            available (season: 2022, week: 1) {
+                player_id,
+                name,
+                pos,
                 actual
             }
         }
