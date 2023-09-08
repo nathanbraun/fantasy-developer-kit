@@ -32,6 +32,11 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.13.1 (2023-09-07)
+Initial update for 2023. Refactored (and improved) underlying simulations and
+API. So far utilities.py, intro.py and the WDIS project are updated. Rest
+coming ASAP.
+
 ### v0.12.1 (2022-09-29)
 Fix bug in ESPN where things were failing if people hadn't played yet (thanks
 Graydon!)
