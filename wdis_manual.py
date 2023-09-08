@@ -1,24 +1,27 @@
 import pandas as pd
 from os import path
 import seaborn as sns
-from utilities import generate_token, get_sims, LICENSE_KEY, OUTPUT_PATH
+from utilities import (generate_token, get_sims, get_players, name_sims,
+    LICENSE_KEY, OUTPUT_PATH)
 
 WEEK = 1
 SEASON = 2021
-NSIMS = 1000
-SCORING = {'qb': 'pass6', 'skill': 'ppr', 'dst': 'high'}
+NSIMS = 500
+SCORING = {'qb': 'pass_6', 'skill': 'ppr_1', 'dst': 'dst_high'}
 TAG = 'WDIS_MANUAL_EX'  # stored in the output
 
-team1 = ['jalen-hurts', 'saquon-barkley', 'clyde-edwards-helaire',
-         'keenan-allen', 'cooper-kupp', 'dallas-goedert', 'jason-myers',
-         'tb-dst']
+team1 = ['jalen-hurts', 'clyde-edwards-helaire', 'saquon-barkley',
+         'keenan-allen', 'cooper-kupp', 'dallas-goedert', 'jason-myers', 'tb']
+team1_ids = [498, 518, 904, 1954, 1139, 974, 1871, 5180]
 
-team2 = ['matthew-stafford', 'christian-mccaffrey', 'antonio-gibson',
-        'tyler-lockett', 'justin-jefferson', 'noah-fant', 'matt-gay',
-        'gb-dst']
+team2 = ['justin-jefferson', 'antonio-gibson', 'noah-fant',
+         'christian-mccaffrey', 'tyler-lockett', 'matthew-stafford',
+         'matt-gay', 'gb']
+team2_ids = [551, 567, 755, 1105, 1542, 2621, 776, 5162]
 
 wdis = ['clyde-edwards-helaire', 'darrell-henderson', 'ronald-jones',
-    'tony-pollard']
+        'tony-pollard']
+wdis_ids = [518, 703, 705, 906]
 
 def start_bench_scenarios(wdis):
     """
@@ -127,20 +130,23 @@ if __name__ == '__main__':
     # generate access token
     token = generate_token(LICENSE_KEY)['token']
 
-    players = list(set(team1) | set(team2) | set(wdis))
+    players = get_players(token, week=WEEK, season=SEASON,
+                          **SCORING).set_index('player_id')
+    player_ids = list(set(team1_ids) | set(team2_ids) | set(wdis_ids))
 
-    sims = get_sims(token, players, week=WEEK, season=SEASON, nsims=NSIMS,
-                        **SCORING)
+    sims = get_sims(token, player_ids, week=WEEK, season=SEASON, nsims=NSIMS,
+                    **SCORING)
+    nsims = name_sims(sims, players)
 
-    df = calculate(sims, team1, team2, wdis)
+    df = calculate(nsims, team1, team2, wdis)
 
-    g = plot(sims, team1, team2, wdis)
+    g = plot(nsims, team1, team2, wdis)
 
     g.fig.savefig(path.join(OUTPUT_PATH, f'wdis_dist_by_team_{TAG}.png'),
                 bbox_inches='tight', dpi=500)
 
     # plot wdis players
-    pw = sims[wdis].stack().reset_index()
+    pw = nsims[wdis].stack().reset_index()
     pw.columns = ['sim', 'player', 'points']
 
     g = sns.FacetGrid(pw, hue='player', aspect=2)
