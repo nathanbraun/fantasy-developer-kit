@@ -7,19 +7,15 @@ from utilities import (LICENSE_KEY, generate_token, get_players, get_sims,
 SEASON = 2022
 WEEK = 1
 SCORING = {'qb': 'pass_4', 'skill': 'ppr_1', 'dst': 'dst_std'}
+USE_SAVED_DATA = True
 
 # get an access token
 token = generate_token(LICENSE_KEY)['token']
 
-players = get_players(token, season=2022, week=1,
-                      **SCORING).set_index('player_id')
-
-USE_SAVED_DATA = True
-
 # note: **SCORING same as passing qb='pass4', skill='ppr' ... to function
 if USE_SAVED_DATA:
     players = (pd.read_csv(path.join('data', 'players.csv'))
-        .set_index('fantasymath_id'))
+        .set_index('player_id'))
 else:
     players = get_players(token, **SCORING, season=SEASON,
                           week=WEEK).set_index('player_id')
@@ -83,3 +79,21 @@ pd.concat([
 (sims[['aaron-rodgers', 'cooper-kupp']].sum(axis=1) > 50).mean()
 
 (sims[['matthew-stafford', 'cooper-kupp']].sum(axis=1) > 50).mean()
+
+
+################################################################################
+## note: this part isn't meant to be run (why it's commented out)
+## just querying and saving the data we use above
+## including here so you can see it just comes from the API
+################################################################################
+
+## get data
+# players = get_players(token, **SCORING, season=SEASON,
+#                       week=WEEK).set_index('player_id')
+# sims = get_sims(token, players=list(players.index), week=WEEK, season=SEASON,
+#                 nsims=500, **SCORING)
+
+## save it
+# players.to_csv(path.join('data', 'players.csv'))
+# sims.to_csv(path.join('data', 'sims.csv'), index=False)
+

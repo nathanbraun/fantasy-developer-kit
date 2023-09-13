@@ -32,6 +32,11 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.14.0 (2023-09-13)
+Major update: add final toos quickstart as first major thing we dive into. As
+part of that, updated league integreation stuff + utilities behind the scenes.
+Let me know if issues. Updated project walkthroughs coming soon.
+
 ### v0.13.1 (2023-09-07)
 Initial update for 2023. Refactored (and improved) underlying simulations and
 API. So far utilities.py, intro.py and the WDIS project are updated. Rest

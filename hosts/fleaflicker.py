@@ -1,7 +1,7 @@
 import requests
 from pandas import DataFrame, Series
 import pandas as pd
-from utilities import (LICENSE_KEY, generate_token, master_player_lookup)
+from utilities import (LICENSE_KEY, generate_token, master_player_lookup, SEASON)
 import numpy as np
 import json
 
@@ -11,12 +11,22 @@ pd.options.mode.chained_assignment = None
 # top level functions:
 ######################
 
-def get_league_rosters(lookup, league_id, week=None):
+def get_league_rosters(lookup, league_id, week=None, starting=True,
+                       skip_kickers=False):
     teams = get_teams_in_league(league_id)
 
     league_rosters = pd.concat(
         [_get_team_roster(x, league_id, lookup) for x in teams['team_id']],
         ignore_index=True)
+
+    if skip_kickers:
+        league_rosters = league_rosters.query("team_position != 'K'")
+
+    if starting:
+        league_rosters = league_rosters.query("start")
+
+    league_rosters['player_id'] = league_rosters['player_id'].astype(int)
+
     return league_rosters
 
 def get_teams_in_league(league_id, example=False):
@@ -38,7 +48,7 @@ def get_league_schedule(league_id, example=False):
         return pd.read_csv('./projects/integration/raw/fleaflicker/schedule.csv')
     else:
         return pd.concat([_get_schedule_by_week(league_id, week) for week in
-                          range(1, 15)], ignore_index=True)
+                          range(1, 19)], ignore_index=True)
 
 ##################
 # helper functions
@@ -100,12 +110,13 @@ def _get_team_roster(team_id, league_id, lookup):
     team_df['team_id'] = team_id
 
     team_df_w_id = pd.merge(team_df,
-                            lookup[['fantasymath_id', 'fleaflicker_id']],
+                            lookup[['player_id', 'fleaflicker_id']],
                             how='left').drop('fleaflicker_id', axis=1)
 
     if 'actual' not in team_df_w_id.columns:
         team_df_w_id['actual'] = np.nan
 
+    team_df_w_id = team_df_w_id.query("player_position.notnull()")
     return team_df_w_id
 
 # team helper functions
@@ -138,14 +149,17 @@ def _process_matchup(game):
 def _get_schedule_by_week(league_id, week):
     schedule_url = (
         'https://www.fleaflicker.com/api/FetchLeagueScoreboard?' +
-        f'leagueId={league_id}&scoringPeriod={week}&season=2022')
+        f'leagueId={league_id}&scoringPeriod={week}&season={SEASON}')
 
     schedule_json = requests.get(schedule_url).json()
 
-    matchup_df = DataFrame([_process_matchup(x) for x in schedule_json['games']])
-    matchup_df['season'] = 2022
-    matchup_df['week'] = week
-    matchup_df['league_id'] = league_id
+    try:
+        matchup_df = DataFrame([_process_matchup(x) for x in schedule_json['games']])
+        matchup_df['season'] = SEASON
+        matchup_df['week'] = week
+        matchup_df['league_id'] = league_id
+    except KeyError:
+        matchup_df = DataFrame()
     return matchup_df
 
 if __name__ == '__main__':

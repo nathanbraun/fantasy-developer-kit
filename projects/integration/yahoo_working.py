@@ -2,10 +2,11 @@ import numpy as np
 from pandas import DataFrame, Series
 import pandas as pd
 from utilities import (LICENSE_KEY, generate_token, master_player_lookup,
-                       YAHOO_FILE, YAHOO_KEY, YAHOO_SECRET)
+                       YAHOO_FILE, YAHOO_KEY, YAHOO_SECRET, YAHOO_GAME_ID)
 import json
 from yahoo_oauth import OAuth2
 from pathlib import Path
+
 
 # store credentials if don't already exist
 if not Path(YAHOO_FILE).exists():
@@ -25,19 +26,22 @@ OAUTH.session.get(game_url, params={'format': 'json'}).json()
 # roster data
 ###############################################################################
 
-LEAGUE_ID = 43886
-TEAM_ID = 11
+LEAGUE_ID = 39252
+TEAM_ID = 1
 WEEK = 1
+SEASON = 2023
+USE_SAVED_DATA = False
 
 roster_url = ('https://fantasysports.yahooapis.com/fantasy/v2' +
-            f'/team/406.l.{LEAGUE_ID}.t.{TEAM_ID}/roster;week={WEEK}')
+            f'/team/{YAHOO_GAME_ID}.l.{LEAGUE_ID}.t.{TEAM_ID}/roster;week={WEEK}')
 
 # gets current data
 # should run/look at, but we're overwriting with saved data next line
 roster_json = OAUTH.session.get(roster_url, params={'format': 'json'}).json()
 
-with open('./projects/integration/raw/yahoo/roster.json') as f:
-    roster_json = json.load(f)
+if USE_SAVED_DATA:
+    with open('./projects/integration/raw/yahoo/roster.json') as f:
+        roster_json = json.load(f)
 
 # open up in browser and look at it
 
@@ -46,7 +50,7 @@ players_dict = (
 
 players_dict.keys()
 
-player0 = players_dict['0']  # josh allen
+player0 = players_dict['0']  # 
 player0
 
 def player_list_to_dict(player):
@@ -130,8 +134,6 @@ process_players(players_dict)
 # players_dict = roster_json['fantasy_content']['team'][1]['roster']['0']['players']
 team_id = roster_json['fantasy_content']['team'][0][1]['team_id']
 
-players_df2['team_id'] = team_id
-
 def process_roster(team):
     players_df = process_players(team[1]['roster']['0']['players'])
     team_id = team[0][1]['team_id']
@@ -143,19 +145,18 @@ roster_df = process_roster(roster_json['fantasy_content']['team'])
 
 # get actual points
 points_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
-                f'team/406.l.{LEAGUE_ID}.t.{TEAM_ID}' +
+                f'team/{YAHOO_GAME_ID}.l.{LEAGUE_ID}.t.{TEAM_ID}' +
             "/players;out=metadata,stats,ownership,percent_owned,draft_analysis")
 
-# gets current data
-# should run/look at, but we're overwriting with saved data next line
-points_json = OAUTH.session.get(points_url, params={'format': 'json'}).json()
-
 # saved data
-with open('./projects/integration/raw/yahoo/points.json') as f:
-    points_json = json.load(f)
+if USE_SAVED_DATA:
+    with open('./projects/integration/raw/yahoo/points.json') as f:
+        points_json = json.load(f)
+else:
+    points_json = OAUTH.session.get(points_url, params={'format': 'json'}).json()
 
 player_dict = points_json['fantasy_content']['team'][1]['players']
-gronk = player_dict['1']
+mahomes = player_dict['1']
 
 def process_player_stats(player):
     dict_to_return = {}
@@ -164,7 +165,7 @@ def process_player_stats(player):
         player['player'][1]['player_points']['total'])
     return dict_to_return
 
-process_player_stats(gronk)
+process_player_stats(mahomes)
 
 def process_team_stats(team):
     stats = DataFrame([process_player_stats(player) for key, player in
@@ -182,18 +183,21 @@ roster_df_w_stats['name'].str.lower().str.replace(' ','-').head()
 from utilities import (LICENSE_KEY, generate_token, master_player_lookup)
 
 token = generate_token(LICENSE_KEY)['token']
-fantasymath_players = master_player_lookup(token)
 
-fantasymath_players = pd.read_csv('./projects/integration/raw/lookup.csv')
+if USE_SAVED_DATA:
+    fantasymath_players = master_player_lookup(token)
+else:
+    fantasymath_players = pd.read_csv('./projects/integration/raw/yahoo/lookup.csv')
+
 fantasymath_players.head()
 
 roster_df_w_id = pd.merge(roster_df_w_stats,
-                          fantasymath_players[['fantasymath_id', 'yahoo_id']],
+                          fantasymath_players[['player_id', 'yahoo_id']],
                           how='left')
 
 def get_team_roster(team_id, league_id, week, lookup):
     roster_url = ('https://fantasysports.yahooapis.com/fantasy/v2' +
-                  f'/team/406.l.{league_id}.t.{team_id}/roster;week={week}')
+                  f'/team/{YAHOO_GAME_ID}.l.{league_id}.t.{team_id}/roster;week={week}')
 
     roster_json = OAUTH.session.get(roster_url, params={'format': 'json'}).json()
 
@@ -201,7 +205,7 @@ def get_team_roster(team_id, league_id, week, lookup):
 
     # stats
     points_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
-                    f'team/406.l.{LEAGUE_ID}.t.{TEAM_ID}' +
+                    f'team/{YAHOO_GAME_ID}.l.{league_id}.t.{team_id}' +
                 "/players;out=metadata,stats,ownership,percent_owned,draft_analysis")
     points_json = OAUTH.session.get(points_url, params={'format': 'json'}).json()
 
@@ -210,7 +214,7 @@ def get_team_roster(team_id, league_id, week, lookup):
     roster_df_w_stats = pd.merge(roster_df, stats)
 
     roster_df_w_id = pd.merge(roster_df_w_stats,
-                            lookup[['fantasymath_id', 'yahoo_id']],
+                            lookup[['player_id', 'yahoo_id']],
                             how='left').drop('yahoo_id', axis=1)
 
     return roster_df_w_id
@@ -222,19 +226,21 @@ my_roster = get_team_roster(TEAM_ID, LEAGUE_ID, 1, fantasymath_players)
 ###############################################################################
 
 teams_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
-            f'league/406.l.{LEAGUE_ID}' +
+            f'league/{YAHOO_GAME_ID}.l.{LEAGUE_ID}' +
             ';out=metadata,settings,standings,scoreboard,teams,players,draftresults,transactions')
 
 # gets current data
 # should run/look at, but we're overwriting with saved data next line
-teams_json = (OAUTH
-                .session
-                .get(teams_url, params={'format': 'json'})
-                .json())
 
-# saved data
-with open('./projects/integration/raw/yahoo/teams.json') as f:
-    team_json = json.load(f)
+if USE_SAVED_DATA:
+    with open('./projects/integration/raw/yahoo/teams.json') as f:
+        team_json = json.load(f)
+else:
+    teams_json = (OAUTH
+                    .session
+                    .get(teams_url, params={'format': 'json'})
+                    .json())
+
 
 teams_dict = teams_json['fantasy_content']['league'][2]['standings'][0]['teams']
 
@@ -267,7 +273,7 @@ process_team(team0)
 
 def get_teams_in_league(league_id):
     teams_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
-                f'league/406.l.{league_id}' +
+                f'league/{YAHOO_GAME_ID}.l.{league_id}' +
                 ';out=metadata,settings,standings,scoreboard,teams,players,draftresults,transactions')
 
     teams_json = (OAUTH
@@ -285,6 +291,7 @@ def get_teams_in_league(league_id):
     return teams_df
 
 league_teams = get_teams_in_league(LEAGUE_ID)
+league_teams
 
 def get_league_rosters(lookup, league_id, week):
     teams = get_teams_in_league(league_id)
@@ -297,11 +304,14 @@ def get_league_rosters(lookup, league_id, week):
 
 league_rosters = get_league_rosters(fantasymath_players, LEAGUE_ID, WEEK)
 
+# minor fix to make it consistent with other sites
+league_rosters['team_position'].replace({'W/R/T': 'WR/RB/TE'}, inplace=True)
+
 ###############################################################################
 # schedule info
 ###############################################################################
 schedule_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
-                f'team/406.l.{LEAGUE_ID}.t.{TEAM_ID}' +
+                f'team/{YAHOO_GAME_ID}.l.{LEAGUE_ID}.t.{TEAM_ID}' +
                 ';out=matchups')
 
 # gets current data
@@ -309,8 +319,11 @@ schedule_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
 schedule_json = OAUTH.session.get(schedule_url, params={'format': 'json'}).json()
 
 # saved data
-with open('./projects/integration/raw/yahoo/schedule.json') as f:
-    schedule_json = json.load(f)
+if USE_SAVED_DATA:
+    with open('./projects/integration/raw/yahoo/schedule.json') as f:
+        schedule_json = json.load(f)
+else:
+    schedule_json = OAUTH.session.get(schedule_url, params={'format': 'json'}).json()
 
 matchups_dict = schedule_json['fantasy_content']['team'][1]['matchups']
 matchup0 = matchups_dict['0']
@@ -354,9 +367,9 @@ def make_matchup_id(season, week, team1, team2):
     return int(str(season) + str(week).zfill(2) +
                      str(teams[0]).zfill(2) + str(teams[1]).zfill(2))
 
-make_matchup_id(2021, 1, 2, 7)
+make_matchup_id(2023, 1, 1, 8)
 
-make_matchup_id(2021, 1, 7, 2)
+make_matchup_id(2023, 1, 8, 1)
 
 def process_matchup2(matchup):
     team0 = yahoo_list_to_dict(matchup['matchup']['0']['teams']['0'], 'team')
@@ -367,13 +380,13 @@ def process_matchup2(matchup):
     dict_to_return['opp_id'] = team1['team_id']
     dict_to_return['week'] = matchup['matchup']['week']
     dict_to_return['matchup_id'] = make_matchup_id(
-        2021, matchup['matchup']['week'], team0['team_id'], team1['team_id'])
+        SEASON, matchup['matchup']['week'], team0['team_id'], team1['team_id'])
 
     return dict_to_return
 
 def get_schedule_by_team(team_id, league_id):
     schedule_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
-                    f'team/406.l.{league_id}.t.{team_id}' +
+                    f'team/{YAHOO_GAME_ID}.l.{league_id}.t.{team_id}' +
                     ';out=matchups')
 
     schedule_raw = OAUTH.session.get(schedule_url, params={'format': 'json'}).json()
@@ -382,12 +395,14 @@ def get_schedule_by_team(team_id, league_id):
             for key, matchup
             in matchup_dict.items()
             if key != 'count'])
-    df['season'] = 2021
+    df['season'] = SEASON
     return df
 
-
-all_team_schedules = pd.concat([get_schedule_by_team(x, LEAGUE_ID) for x in
-                                league_teams['team_id']], ignore_index=True)
+if USE_SAVED_DATA:
+    all_team_schedules = pd.read_csv('./projects/integration/raw/yahoo/schedule.csv')
+else:
+    all_team_schedules = pd.concat([get_schedule_by_team(x, LEAGUE_ID) for x in
+                                    league_teams['team_id']], ignore_index=True)
 
 all_team_schedules.head(20)
 
@@ -402,9 +417,12 @@ schedule_by_week.head(10)
 def get_league_schedule(league_id):
     league_teams = get_teams_in_league(league_id)
 
-    schedule_by_team = pd.concat([get_schedule_by_team(x, league_id) for
-                                  x in league_teams['team_id']],
-                                   ignore_index=True)
+    if USE_SAVED_DATA:
+        schedule_by_team = pd.read_csv('./projects/integration/raw/yahoo/schedule.csv')
+    else:
+        schedule_by_team = pd.concat([get_schedule_by_team(x, league_id) for
+                                      x in league_teams['team_id']],
+                                       ignore_index=True)
 
     schedule_by_week = schedule_by_team.drop_duplicates('matchup_id')
 
@@ -414,3 +432,42 @@ def get_league_schedule(league_id):
 
 league_schedule = get_league_schedule(LEAGUE_ID)
 league_schedule.head(10)
+
+################################################################################
+################################################################################
+## note: this part isn't meant to be run
+## i (NB) am running this Friday 9/8/23 - after DET beat KC last night to save
+## data we'll load above
+## 
+## including here to make it clearer this saved data just comes from APIs
+################################################################################
+################################################################################
+
+##################################
+## get data from Yahoo and FM apis
+##################################
+#roster_json = OAUTH.session.get(roster_url, params={'format': 'json'}).json()
+#points_json = OAUTH.session.get(points_url, params={'format': 'json'}).json()
+#teams_json = (OAUTH.session.get(teams_url, params={'format': 'json'}).json())
+#schedule_json = OAUTH.session.get(schedule_url, params={'format': 'json'}).json()
+#fantasymath_players = master_player_lookup(token)
+#all_team_schedules = pd.concat([get_schedule_by_team(x, LEAGUE_ID) for x in
+#                                league_teams['team_id']], ignore_index=True)
+
+##############
+## now save it
+##############
+#with open('./projects/integration/raw/yahoo/roster.json', 'w') as f:
+#    json.dump(roster_json, f)
+
+#with open('./projects/integration/raw/yahoo/points.json', 'w') as f:
+#    json.dump(points_json, f)
+
+#with open('./projects/integration/raw/yahoo/teams.json', 'w') as f:
+#    json.dump(teams_json, f)
+
+#with open('./projects/integration/raw/yahoo/schedule.json', 'w') as f:
+#    json.dump(schedule_json, f)
+
+#fantasymath_players.to_csv('./projects/integration/raw/yahoo/lookup.csv', index=False)
+#all_team_schedules.to_csv('./projects/integration/raw/yahoo/schedule.csv', index=False)

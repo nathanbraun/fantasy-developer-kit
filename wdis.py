@@ -1,4 +1,5 @@
-import hosts.fleaflicker as site
+from hosts.league_setup import LEAGUES
+from pandas import DataFrame
 import hosts.db as db
 from os import path
 import datetime as dt
@@ -8,21 +9,25 @@ import pandas as pd
 from pathlib import Path
 from os import path
 from utilities import (LICENSE_KEY, generate_token, master_player_lookup,
-                       get_sims, get_players, DB_PATH, OUTPUT_PATH,
-                       schedule_long)
+    get_players, DB_PATH, OUTPUT_PATH, get_sims_from_roster, schedule_long)
 
-# enter your league ID info here
-# used to get correct data out of db
-# note: you NEED to have run `create_league.py` on whatever you do here
-LEAGUE_ID = 34958
+#####################
+# set parameters here
+#####################
+LEAGUE = 'nate-league'
 WEEK = 2
+WRITE_OUTPUT = False
+
+##############################################
+# shouldn't have to change anything below this
+##############################################
 
 def wdis_by_pos(pos, sims, roster, opponent_starters):
     wdis_options = wdis_options_by_pos(roster, pos)
 
-    starters = list(roster.loc[rosters['start'] &
-                               rosters['fantasymath_id'].notnull(),
-                               'fantasymath_id'])
+    starters = list(roster.loc[roster['start'] &
+                               roster['player_id'].notnull(),
+                               'player_id'])
 
     df = wdis.calculate(sims, starters, opponent_starters, set(wdis_options) &
                         set(sims.columns))
@@ -32,7 +37,23 @@ def wdis_by_pos(pos, sims, roster, opponent_starters):
     df.reset_index(inplace=True)
     df.set_index(['pos', 'player'], inplace=True)
 
-    return df
+    # now update roster with start decisions
+    current_starter = roster.loc[(roster['team_position'] == pos) &
+        roster['start'], 'player_id'].iloc[0]
+    recc_starter = df.xs(pos).index[0]
+
+    if current_starter == recc_starter:
+        return df, roster
+    else:
+        bench = roster.loc[(roster['player_id'] == recc_starter),
+        'team_position'].iloc[0]
+
+        roster.loc[(roster['player_id'] == current_starter), 'team_position'] = bench
+        roster.loc[(roster['player_id'] == current_starter), 'start'] = False
+        roster.loc[(roster['player_id'] == recc_starter), 'start'] = True
+        roster.loc[(roster['player_id'] == recc_starter), 'team_position'] = pos
+
+        return df, roster
 
 # as always, let's put this in a function
 def wdis_options_by_pos(roster, team_pos):
@@ -41,14 +62,21 @@ def wdis_options_by_pos(roster, team_pos):
                     .apply(lambda x: x in team_pos) & ~roster['start']) |
                     (roster['team_position'] == team_pos))
 
-    return list(roster.loc[is_wdis_elig, 'fantasymath_id'])
+    return list(roster.loc[is_wdis_elig, 'player_id'])
 
 def positions_from_roster(roster):
     return list(roster.loc[roster['start'] &
-                           roster['fantasymath_id'].notnull(),
+                           roster['player_id'].notnull(),
                            'team_position'])
 
 if __name__ == '__main__':
+    try:
+        assert LEAGUE in LEAGUES.keys()
+    except AssertionError:
+        print(f"League {LEAGUE} not found. Valid leagues are: {', '.join(list(LEAGUES.keys()))}")
+
+    LEAGUE_ID = LEAGUES[LEAGUE]['league_id']
+
     # open up our database connection
     conn = sqlite3.connect(DB_PATH)
 
@@ -60,14 +88,26 @@ if __name__ == '__main__':
     schedule = db.read_league('schedule', LEAGUE_ID, conn)
     league = db.read_league('league', LEAGUE_ID, conn)
 
+    # now import site based on host
+    match league.iloc[0]['host']:
+        case 'fleaflicker':
+            import hosts.fleaflicker as site
+        case 'yahoo':
+            import hosts.yahoo as site
+        case 'espn':
+            import hosts.espn as site
+        case _:
+            raise ValueError('Unknown host')
+
     # get parameters from league DataFrame
 
-    TEAM_ID = league.iloc[0]['team_id']
-    HOST = league.iloc[0]['host']
-    SCORING = {}
-    SCORING['qb'] = league.iloc[0]['qb_scoring']
-    SCORING['skill'] = league.iloc[0]['skill_scoring']
-    SCORING['dst'] = league.iloc[0]['dst_scoring']
+    team_id = league.iloc[0]['team_id']
+    host = league.iloc[0]['host']
+    league_scoring = {
+        'qb':league.iloc[0]['qb_scoring'],
+        'skill': league.iloc[0]['skill_scoring'],
+        'dst': league.iloc[0]['dst_scoring']
+    }
 
     #####################
     # get current rosters
@@ -75,49 +115,40 @@ if __name__ == '__main__':
 
     # need players from FM API
     token = generate_token(LICENSE_KEY)['token']
-    player_lookup = master_player_lookup(token).query("fleaflicker_id.notnull()")
+    player_lookup = master_player_lookup(token)
 
-    rosters = site.get_league_rosters(player_lookup, LEAGUE_ID, WEEK)
+    rosters = site.get_league_rosters(player_lookup, LEAGUE_ID, WEEK,
+                                      starting=False)
 
     ########################
     # what we need for wdis:
     ########################
     # 1. list of our starters
 
-    roster = rosters.query(f"team_id == {TEAM_ID}")
+    roster = rosters.query(f"team_id == {team_id}")
 
     current_starters = list(roster.loc[roster['start'] &
-                                       roster['fantasymath_id'].notnull(),
-                                       'fantasymath_id'])
+                                       roster['player_id'].notnull(),
+                                       'player_id'])
 
     # 2. list of opponent's starters
 
     # first: use schedule to find our opponent this week
     schedule_team = schedule_long(schedule)
     opponent_id = schedule_team.loc[
-        (schedule_team['team_id'] == TEAM_ID) & (schedule_team['week'] == WEEK),
+        (schedule_team['team_id'] == team_id) & (schedule_team['week'] == WEEK),
         'opp_id'].values[0]
 
     # then same thing
     opponent_starters = rosters.loc[
         (rosters['team_id'] == opponent_id) & rosters['start'] &
-        rosters['fantasymath_id'].notnull(), ['fantasymath_id', 'actual']]
+        rosters['player_id'].notnull(), ['player_id', 'actual']]
 
 
     # 3. sims
-    available_players = get_players(token, **SCORING)
-
-    players_to_sim = pd.concat([
-        roster[['fantasymath_id', 'actual']],
-        opponent_starters])
-
-    sims = get_sims(token, set(players_to_sim['fantasymath_id']) &
-                    set(available_players['fantasymath_id']),
-                    nsims=1000, **SCORING)
-
-    players_w_pts = players_to_sim.query("actual.notnull()")
-    for player, pts in zip(players_w_pts['fantasymath_id'], players_w_pts['actual']):
-        sims[player] = pts
+    sims = get_sims_from_roster(
+        token, rosters.query(f"team_id in ({team_id}, {opponent_id})"),
+        nsims=1000, **league_scoring)
 
     ################################################
     # analysis - call wdis_by_pos over all positions
@@ -126,46 +157,70 @@ if __name__ == '__main__':
     positions = positions_from_roster(roster)
 
     # calling actual analysis function goes here
-    df_start = pd.concat(
-        [wdis_by_pos(pos, sims, roster,
-                     list(opponent_starters['fantasymath_id'])) for pos in
-         positions])
+    df_start = DataFrame()
+    for pos in positions:
+        df1, roster = wdis_by_pos(pos, sims, roster,
+                                  list(opponent_starters['player_id']))
+        df_start = pd.concat([df_start, df1])
 
     # extract starters
     rec_starters = [df_start.xs(pos)['wp'].idxmax() for pos in positions]
 
+    players = get_players(token, **league_scoring).set_index('player_id')
+
+    print("")
+    print("Recommended Starters:")
+    print("")
+    for starter, pos in zip(rec_starters, positions):
+        print(f"{pos}: {players.loc[starter, 'name']}")
+
+    print("")
+    if set(rec_starters) == set(current_starters):
+        print("Current starters maximize probability of winning")
+    else:
+        print("WARNING: Not maximizing probability of winning!")
+        print("")
+        print("Start:")
+        print(", ".join(players.loc[list(set(rec_starters) - set(current_starters)),
+              'name'].values))
+        print("")
+        print("Instead of:")
+        print(", ".join(players.loc[list(set(current_starters) - set(rec_starters)),
+              'name'].values))
+        
+
     ######################
     # write output to file
     ######################
+    if WRITE_OUTPUT:
+        league_wk_output_dir = path.join(
+            OUTPUT_PATH, f'{host}_{LEAGUE_ID}_2021-{str(WEEK).zfill(2)}')
 
-    league_wk_output_dir = path.join(
-        OUTPUT_PATH, f'{HOST}_{LEAGUE_ID}_2021-{str(WEEK).zfill(2)}')
+        Path(league_wk_output_dir).mkdir(exist_ok=True)
 
-    Path(league_wk_output_dir).mkdir(exist_ok=True)
+        wdis_output_file = path.join(league_wk_output_dir, 'wdis.txt')
 
-    wdis_output_file = path.join(league_wk_output_dir, 'wdis.txt')
-
-    with open(wdis_output_file, 'w') as f:
-        print(f"WDIS Analysis, Fleaflicker League {LEAGUE_ID}, Week {WEEK}", file=f)
-        print("", file=f)
-        print(f"Run at {dt.datetime.now()}", file=f)
-        print("", file=f)
-        print("Recommended Starters:", file=f)
-        for starter, pos in zip(rec_starters, positions):
-            print(f"{pos}: {starter}", file=f)
-
-        print("", file=f)
-        print("Detailed Projections and Win Probability:", file=f)
-        print(df_start[['mean', 'wp', 'wrong', 'regret']], file=f)
-        print("", file=f)
-
-        if set(current_starters) == set(rec_starters):
-            print("Current starters maximize probability of winning.", file=f)
-        else:
-            print("Not maximizing probability of winning.", file=f)
+        with open(wdis_output_file, 'w') as f:
+            print(f"WDIS Analysis, Fleaflicker League {LEAGUE_ID}, Week {WEEK}", file=f)
             print("", file=f)
-            print("Start:", file=f)
-            print(set(rec_starters) - set(current_starters), file=f)
+            print(f"Run at {dt.datetime.now()}", file=f)
             print("", file=f)
-            print("Instead of:", file=f)
-            print(set(current_starters) - set(rec_starters), file=f)
+            print("Recommended Starters:", file=f)
+            for starter, pos in zip(rec_starters, positions):
+                print(f"{pos}: {starter}", file=f)
+
+            print("", file=f)
+            print("Detailed Projections and Win Probability:", file=f)
+            print(df_start[['mean', 'wp', 'wrong', 'regret']], file=f)
+            print("", file=f)
+
+            if set(current_starters) == set(rec_starters):
+                print("Current starters maximize probability of winning.", file=f)
+            else:
+                print("Not maximizing probability of winning.", file=f)
+                print("", file=f)
+                print("Start:", file=f)
+                print(set(rec_starters) - set(current_starters), file=f)
+                print("", file=f)
+                print("Instead of:", file=f)
+                print(set(current_starters) - set(rec_starters), file=f)

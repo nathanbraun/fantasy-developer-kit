@@ -1,4 +1,5 @@
 from pandas import DataFrame, Series
+import numpy as np
 import os
 from textwrap import dedent
 import pandas as pd
@@ -20,6 +21,7 @@ config.read('config.ini')
 # constants - mostly loaded from config.ini - shouldn't need to change
 # if not working make sure you have config.ini set up
 API_URL = 'https://api.sims.fantasymath.com'
+SEASON = 2023
 
 if not Path('config.ini').is_file():
     print(dedent(f"""
@@ -43,6 +45,7 @@ DB_PATH = config['sdk']['DB_PATH']
 YAHOO_FILE = config['yahoo']['FILE']
 YAHOO_KEY =  config['yahoo']['KEY']
 YAHOO_SECRET = config['yahoo']['SECRET']
+YAHOO_GAME_ID = 423  # changes every year - 423 for 2023
 
 # espn
 SWID = config['espn']['SWID']
@@ -129,7 +132,7 @@ def get_players(token,  qb='pass_6', skill='ppr_1', dst='dst_std', week=None,
     arg_string = f'qb: "{qb}", skill: "{skill}", dst: "{dst}"'
 
     variables = ['player_id', 'name', 'pos', 'fleaflicker_id', 'espn_id',
-                 'yahoo_id', 'sleeper_id']
+                 'yahoo_id', 'sleeper_id', 'team']
 
     if (week is not None) and (season is not None):
         arg_string = arg_string + f', season: {season}, week: {week}'
@@ -162,6 +165,71 @@ def _check_arg(name, arg, allowed, none_ok=False):
     """
     if not ((arg in allowed) or (none_ok and arg is None)):
         raise ValueError(f"Invalid {name} argument. Needs to be in {allowed}.")
+
+def remaining_teams_this_week(token):
+    query = f"""
+        query {{
+            remaining_teams_this_week 
+        }}
+        """
+
+    r = requests.post(API_URL, json={'query': query},
+                  headers={'Authorization': f'Bearer {token}'})
+    raw = json.loads(r.text)['data']
+
+    if raw is None:
+        print("No data. Check token.")
+        return []
+
+    return raw['remaining_teams_this_week']
+
+
+def get_sims_from_roster(token, rosters, nsims=100, **kwargs):
+    """
+    Takes a league roster input, which is a DataFrame with player_id + any
+    points scored so far (if running midweek).
+
+    Uses that to get sims for players yet to to play. Adds in players actual
+    scores if they played.
+    """
+
+    # teams still to play
+    teams_to_play = remaining_teams_this_week(token)
+
+    # add in team to rosters
+    # available players (need this because it has team)
+    players = get_players(token, **kwargs).set_index('player_id')
+    rosters = pd.merge(rosters, players[['team']].reset_index(), how='left',
+                       indicator=True)
+
+    # print a warning for anyone in rosters that isn't available
+    if (rosters['_merge'] == 'left_only').any():
+        print("No sims available for:")
+        print(rosters.query("_merge == 'left_only'"))
+
+    rosters.drop('_merge', axis=1, inplace=True)
+
+    # now get sims for players who have yet to play
+
+    played = rosters['team'].apply(lambda x: x not in teams_to_play)
+    players_to_get = list(rosters.loc[~played, 'player_id'])
+
+    if len(players_to_get) == 0:
+        sims = DataFrame(columns=list(rosters['player_id']), index=range(nsims))
+    else:
+        sims = get_sims(token, players_to_get, nsims=nsims, **kwargs)
+
+    # add in any actual scores
+    for i, row in rosters.set_index('player_id').iterrows():
+        if i in players_to_get:
+            continue
+        else:
+            if pd.isna(row['actual']):
+                sims[i] = 0
+            else:
+                sims[i] = row['actual']
+
+    return sims
 
 def get_sims(token, players, qb='pass_6', skill='ppr_1', dst='dst_std',
              nsims=100, week=None, season=None):
@@ -222,6 +290,23 @@ def schedule_long(sched):
     sched2 = sched.rename(columns={'team2_id': 'team_id', 'team1_id':
                                       'opp_id'})
     return pd.concat([sched1, sched2], ignore_index=True)
+
+def proc_roster_score(rosters, players, teams_to_play):
+    rosters = pd.merge(rosters, players[['team']].reset_index(), how='left',
+                       indicator=True)
+    assert rosters['_merge'].eq('both').all()
+    rosters.drop('_merge', axis=1, inplace=True)
+    played = rosters['team'].apply(lambda x: x not in teams_to_play)
+    rosters.loc[played & rosters['actual'].isna(), 'actual'] = 0
+    rosters.loc[~played, 'actual'] = np.nan
+
+    return rosters
+
+def update_sims_with_actual(sims, rosters):
+    players_w_pts = rosters.query("actual.notnull()")
+    for player, pts in zip(players_w_pts['player_id'], players_w_pts['actual']):
+        sims[player] = pts
+    return sims
 
 if __name__ == '__main__':
     # generate access token

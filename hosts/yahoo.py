@@ -3,7 +3,7 @@ from pathlib import Path
 from pandas import DataFrame, Series
 import pandas as pd
 from utilities import (LICENSE_KEY, generate_token, master_player_lookup,
-                       YAHOO_FILE, YAHOO_KEY)
+                       YAHOO_FILE, YAHOO_KEY, YAHOO_GAME_ID, SEASON)
 from yahoo_oauth import OAuth2
 import json
 
@@ -27,19 +27,26 @@ OAUTH =  OAuth2(None, None, from_file=YAHOO_FILE)
 # top level functions:
 ######################
 
-
-def get_league_rosters(lookup, league_id, week):
+def get_league_rosters(lookup, league_id, week, starting=True,
+                       skip_kickers=False):
     teams = get_teams_in_league(league_id=league_id)
 
     league_rosters = pd.concat(
         [_get_team_roster(x, league_id, week, lookup) for x in
          teams['team_id']], ignore_index=True)
+
+    if starting:
+        league_rosters = league_rosters.query("start")
+
     league_rosters['team_position'].replace({'W/R/T': 'WR/RB/TE'}, inplace=True)
+    league_rosters['team_position'].replace({'Q/W/R/T': 'QB/WR/RB/TE'}, inplace=True)
+    league_rosters['team_id'] = league_rosters['team_id'].astype(int)
+
     return league_rosters
 
 def get_teams_in_league(league_id, example=False):
     teams_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
-                f'league/414.l.{league_id}' +
+                f'league/{YAHOO_GAME_ID}.l.{league_id}' +
                 ';out=metadata,settings,standings,scoreboard,teams,players,draftresults,transactions')
 
     if example:
@@ -74,6 +81,7 @@ def get_league_schedule(league_id, example=False):
 
     schedule_by_week.columns = ['team1_id', 'team2_id', 'week', 'matchup_id',
                                 'season']
+    schedule_by_week['league_id'] = league_id
     return schedule_by_week
 
 
@@ -129,7 +137,7 @@ def _process_roster(team):
 
 def _get_team_roster(team_id, league_id, week, lookup):
     roster_url = ('https://fantasysports.yahooapis.com/fantasy/v2' +
-                  f'/team/414.l.{league_id}.t.{team_id}/roster;week={week}')
+                f'/team/{YAHOO_GAME_ID}.l.{league_id}.t.{team_id}/roster;week={week}')
 
     roster_json = OAUTH.session.get(roster_url, params={'format': 'json'}).json()
 
@@ -137,7 +145,7 @@ def _get_team_roster(team_id, league_id, week, lookup):
 
 # stats
     points_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
-                    f'team/414.l.{LEAGUE_ID}.t.{team_id}' +
+                    f'team/{YAHOO_GAME_ID}.l.{league_id}.t.{team_id}' +
                 "/players;out=metadata,stats,ownership,percent_owned,draft_analysis")
     points_json = OAUTH.session.get(points_url, params={'format': 'json'}).json()
 
@@ -146,7 +154,7 @@ def _get_team_roster(team_id, league_id, week, lookup):
     roster_df_w_stats = pd.merge(roster_df, stats)
 
     roster_df_w_id = pd.merge(roster_df_w_stats,
-                            lookup[['fantasymath_id', 'yahoo_id']],
+                            lookup[['player_id', 'yahoo_id']],
                             how='left').drop('yahoo_id', axis=1)
 
     return roster_df_w_id
@@ -202,13 +210,13 @@ def _process_matchup(matchup):
     dict_to_return['opp_id'] = team1['team_id']
     dict_to_return['week'] = matchup['matchup']['week']
     dict_to_return['matchup_id'] = _make_matchup_id(
-        2021, matchup['matchup']['week'], team0['team_id'], team1['team_id'])
+        SEASON, matchup['matchup']['week'], team0['team_id'], team1['team_id'])
 
     return dict_to_return
 
 def _get_schedule_by_team(team_id, league_id):
     schedule_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
-                    f'team/414.l.{league_id}.t.{team_id}' +
+                    f'team/{YAHOO_GAME_ID}.l.{league_id}.t.{team_id}' +
                     ';out=matchups')
 
     schedule_raw = OAUTH.session.get(schedule_url, params={'format': 'json'}).json()
@@ -217,11 +225,11 @@ def _get_schedule_by_team(team_id, league_id):
             for key, matchup
             in matchup_dict.items()
             if key != 'count'])
-    df['season'] = 2021
+    df['season'] = SEASON
     return df
 
-CONSUMER_KEY =  "dj0yJmk9VTZhWktxQU81Z3lqJmQ9WVdrOVVHOUNaa3ROUTFFbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWVk"
-CONSUMER_SECRET = "56ec294a542df43a5660a296e86deaaa1eff00c8"
+# CONSUMER_KEY =  "dj0yJmk9VTZhWktxQU81Z3lqJmQ9WVdrOVVHOUNaa3ROUTFFbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWVk"
+# CONSUMER_SECRET = "56ec294a542df43a5660a296e86deaaa1eff00c8"
 
 if __name__ == '__main__':
 
