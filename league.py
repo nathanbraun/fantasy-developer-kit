@@ -32,15 +32,15 @@ def summarize_matchup(sims_a, sims_b):
     total_b = sims_b.sum(axis=1)
 
     # get win prob
-    winprob_a = (total_a > total_b).mean().round(2)
-    winprob_b = 1 - winprob_a.round(2)
+    winprob_a = round((total_a > total_b).mean(), 2)
+    winprob_b = round(1 - winprob_a, 2)
 
     # get over-under
-    over_under = (total_a + total_b).median().round(2)
+    over_under = round((total_a + total_b).median(), 2)
 
     # line
-    line = (total_a - total_b).median().round(2)
-    line = round(line*2)/2
+    line = round((total_a - total_b).median(), 2)
+    line = round((line*2)/2, 2)
 
     return {'wp_a': winprob_a, 'wp_b': winprob_b, 'over_under': over_under,
             'line': line}
