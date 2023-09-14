@@ -1,6 +1,6 @@
-# 2022 Fantasy Football Developer Kit
-These are the files for 2022 Fantasy Football Developer Kit. If you're reading
-this and you *haven't* bought the 2022 kit yet, you can get it at
+# 2023 Fantasy Football Developer Kit
+These are the files for 2023 Fantasy Football Developer Kit. If you're reading
+this and you *haven't* bought the 2023 kit yet, you can get it at
 [https://fantasycoding.com](https://fantasycoding.com).
 
 If you have, let's get started.  See installation instructions and then pick
@@ -32,6 +32,9 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.14.1 (2023-09-14)
+Fix (sometimes) rounding issue in leauge.py (thanks Jonathan!)
+
 ### v0.14.0 (2023-09-13)
 Major update: add final toos quickstart as first major thing we dive into. As
 part of that, updated league integreation stuff + utilities behind the scenes.
