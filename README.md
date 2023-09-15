@@ -32,8 +32,11 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.14.2 (2023-09-15)
+Fixed a few bugs in intro.py + added a note about Spyder (thanks Hanson!)
+
 ### v0.14.1 (2023-09-14)
-Fix (sometimes) rounding issue in leauge.py (thanks Jonathan!)
+Fix (sometimes) rounding issue in league.py (thanks Jonathan!)
 
 ### v0.14.0 (2023-09-13)
 Major update: add final toos quickstart as first major thing we dive into. As
