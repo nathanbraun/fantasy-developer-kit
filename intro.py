@@ -1,16 +1,22 @@
 import pandas as pd
 from os import path
 from utilities import (LICENSE_KEY, generate_token, get_players, get_sims,
-    name_sims)
+    name_sims, get_sims_from_file)
 
 # parameters
 SEASON = 2022
 WEEK = 1
 SCORING = {'qb': 'pass_4', 'skill': 'ppr_1', 'dst': 'dst_std'}
-USE_SAVED_DATA = True
 
 # get an access token
 token = generate_token(LICENSE_KEY)['token']
+
+players = get_players(token, **SCORING, season=SEASON,
+                      week=WEEK).set_index('player_id')
+
+players.head()
+
+USE_SAVED_DATA = True
 
 # note: **SCORING same as passing qb='pass4', skill='ppr' ... to function
 if USE_SAVED_DATA:
@@ -24,7 +30,7 @@ else:
 # this week
 
 if USE_SAVED_DATA:
-    sims = pd.read_csv(path.join('data', 'sims.csv'))
+    sims = get_sims_from_file(path.join('data', 'sims.csv'))
 else:
     sims = get_sims(token, players=list(players.index), week=WEEK, season=SEASON,
                     nsims=500, **SCORING)

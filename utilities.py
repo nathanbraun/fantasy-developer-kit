@@ -273,13 +273,17 @@ def get_sims(token, players, qb='pass_6', skill='ppr_1', dst='dst_std',
     return pd.concat([Series(x['sims']).to_frame(x['player_id']) for x in
         raw['sims']['players']], axis=1)
 
+def get_sims_from_file(filename):
+    sims = pd.read_csv(filename)
+    sims.columns = [int(x) for x in sims.columns]
+    return sims
 
 def name_sims(sims, players):
     sims = DataFrame(sims, copy=True)
     sims.columns = list(players.loc[sims.columns, 'name']
                         .str.lower()
-                        .str.replace('.','')
-                        .str.replace(' ', '-'))
+                        .str.replace('.','', regex=False)
+                        .str.replace(' ', '-', regex=False))
     return sims
 
 # misc helper
