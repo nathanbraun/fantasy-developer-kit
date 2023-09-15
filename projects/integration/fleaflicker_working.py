@@ -2,13 +2,14 @@ import requests
 import numpy as np
 from pandas import DataFrame, Series
 import pandas as pd
-from utilities import LICENSE_KEY, SEASON generate_token, master_player_lookup
+from utilities import LICENSE_KEY, SEASON, generate_token, master_player_lookup
 import json
 
 pd.options.mode.chained_assignment = None
 
 LEAGUE_ID = 316893
 TEAM_ID = 1605156
+WEEK = 2
 USE_SAVED_DATA = True
 
 ###############################################################################
@@ -17,16 +18,11 @@ USE_SAVED_DATA = True
 roster_url = ('https://www.fleaflicker.com/api/FetchRoster?' +
               f'leagueId={LEAGUE_ID}&teamId={TEAM_ID}')
 
-# gets current data
-# should run/look at, but we're overwriting with saved data next line
-roster_json = requests.get(roster_url).json()
-
-USE_SAVED_DATA = True
-
-# saved data
 if USE_SAVED_DATA:
     with open('./projects/integration/raw/fleaflicker/roster.json') as f:
         roster_json = json.load(f)
+else:
+    roster_json = requests.get(roster_url).json()
 
 list_of_starter_slots = roster_json['groups'][0]['slots']
 list_of_bench_slots = roster_json['groups'][1]['slots']
@@ -146,15 +142,13 @@ roster_df
 roster_df['team_id'] = TEAM_ID
 roster_df.head()
 
-# next: fantasymath ids
-roster_df['name'].str.lower().str.replace(' ','-').head()
-
 from utilities import (LICENSE_KEY, generate_token, master_player_lookup)
-token = generate_token(LICENSE_KEY)['token']
-fantasymath_players = master_player_lookup(token)
 
-# TODO: save this again
-fantasymath_players = pd.read_csv('./projects/integration/raw/lookup.csv')
+if USE_SAVED_DATA:
+    fantasymath_players = pd.read_csv('./projects/integration/raw/fleaflicker/lookup.csv')
+else:
+    token = generate_token(LICENSE_KEY)['token']
+    fantasymath_players = master_player_lookup(token)
 
 fantasymath_players.head()
 
@@ -165,11 +159,11 @@ roster_df_w_id = pd.merge(
 # we can basically put everything we did above into a function
 # put in a function
 
-def get_team_roster(team_id, league_id, lookup):
+def get_team_roster(team_id, league_id, lookup, use_saved_data=True):
     roster_url = ('https://www.fleaflicker.com/api/FetchRoster?' +
         f'leagueId={league_id}&teamId={team_id}')
 
-    if USE_SAVED_DATA:
+    if use_saved_data:
         with open('./projects/integration/raw/fleaflicker/roster.json') as f:
             roster_json = json.load(f)
     else:
@@ -197,18 +191,15 @@ def get_team_roster(team_id, league_id, lookup):
     return team_df_w_id
 
 my_roster = get_team_roster(TEAM_ID, LEAGUE_ID, fantasymath_players)
+my_roster
 
 ###############################################################################
 # team data
 ###############################################################################
 
 # gets current data
-# should run/look at, but we're overwriting with saved data next line
 teams_url = ('https://www.fleaflicker.com/api/FetchLeagueStandings?' +
              f'leagueId={LEAGUE_ID}')
-
-teams_json = requests.get(teams_url).json()
-
 # saved data
 if USE_SAVED_DATA:
     with open('./projects/integration/raw/fleaflicker/teams.json') as f:
@@ -275,7 +266,8 @@ def get_league_rosters(lookup, league_id):
     teams = get_teams_in_league(league_id)
 
     league_rosters = pd.concat(
-        [get_team_roster(x, league_id, lookup) for x in teams['team_id']],
+        [get_team_roster(x, league_id, lookup, use_saved_data=False) for x in
+            teams['team_id']],
         ignore_index=True)
     return league_rosters
 
@@ -286,19 +278,16 @@ league_rosters.sample(20)
 # schedule
 ###############################################################################
 
-WEEK = 1
 schedule_url = (
     'https://www.fleaflicker.com/api/FetchLeagueScoreboard?' +
     f'leagueId={LEAGUE_ID}&scoringPeriod={WEEK}&season={SEASON}')
-
-# gets current data
-# should run/look at, but we're overwriting with saved data next line
-schedule_json = requests.get(schedule_url).json()
 
 # saved data
 if USE_SAVED_DATA:
     with open('./projects/integration/raw/fleaflicker/schedule.json') as f:
         schedule_json = json.load(f)
+else:
+    schedule_json = requests.get(schedule_url).json()
 
 matchup_list = schedule_json['games']
 matchup0 = matchup_list[0]
@@ -316,13 +305,13 @@ process_matchup(matchup0)
 # let's just do our usual, wrap it in a function that takes league_id, season,
 # week and returns a dataframe
 
-def get_schedule_by_week(league_id, week):
+def get_schedule_by_week(league_id, week, use_saved_data=True):
     schedule_url = (
         'https://www.fleaflicker.com/api/FetchLeagueScoreboard?' +
         f'leagueId={LEAGUE_ID}&scoringPeriod={WEEK}&season={SEASON}')
 
     # schedule_json = requests.get(schedule_url).json()
-    if USE_SAVED_DATA:
+    if use_saved_data:
         with open('./projects/integration/raw/fleaflicker/schedule.json') as f:
             schedule_json = json.load(f)
     else:
@@ -334,12 +323,65 @@ def get_schedule_by_week(league_id, week):
     matchup_df['league_id'] = league_id
     return matchup_df
 
-get_schedule_by_week(LEAGUE_ID, 1)
+get_schedule_by_week(LEAGUE_ID, 2)
 
 # now let's do for entire season
 def get_league_schedule(league_id):
-    return pd.concat([get_schedule_by_week(league_id, week) for week in
+    return pd.concat([get_schedule_by_week(league_id, week, False) for week in
                       range(1, 15)], ignore_index=True)
 
 league_schedule = get_league_schedule(LEAGUE_ID)
 league_schedule.head()
+
+################################################################################
+################################################################################
+
+## note: this part isn't meant to be run
+## i (nate) am running this Friday 9/15/23 - after PHI beat MIN last night - to
+## save data we'll load above
+## 
+## including here to make it clearer this saved data just comes from APIs
+
+########################################
+## get data from Fleaflicker and FM apis
+########################################
+
+#LEAGUE_ID = 316893
+#TEAM_ID = 1605156
+#WEEK = 2
+#SEASON = 2023
+
+#roster_url = ('https://www.fleaflicker.com/api/FetchRoster?' +
+#              f'leagueId={LEAGUE_ID}&teamId={TEAM_ID}')
+
+#teams_url = ('https://www.fleaflicker.com/api/FetchLeagueStandings?' +
+#             f'leagueId={LEAGUE_ID}')
+
+#schedule_url = (
+#    'https://www.fleaflicker.com/api/FetchLeagueScoreboard?' +
+#    f'leagueId={LEAGUE_ID}&scoringPeriod={WEEK}&season={SEASON}')
+
+#token = generate_token(LICENSE_KEY)['token']
+
+## player_dict = points_json['fantasy_content']['team'][1]['players']
+## player_dict['9']
+
+#roster_json = requests.get(roster_url).json()
+#teams_json = requests.get(teams_url).json()
+#schedule_json = requests.get(schedule_url).json()
+#fantasymath_players = master_player_lookup(token)
+
+##############
+## now save it
+##############
+
+#with open('./projects/integration/raw/fleaflicker/roster.json', 'w') as f:
+#    json.dump(roster_json, f)
+
+#with open('./projects/integration/raw/fleaflicker/teams.json', 'w') as f:
+#    json.dump(teams_json, f)
+
+#with open('./projects/integration/raw/fleaflicker/schedule.json', 'w') as f:
+#    json.dump(schedule_json, f)
+
+#fantasymath_players.to_csv('./projects/integration/raw/fleaflicker/lookup.csv', index=False)
