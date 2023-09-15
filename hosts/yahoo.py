@@ -143,10 +143,10 @@ def _get_team_roster(team_id, league_id, week, lookup):
 
     roster_df = _process_roster(roster_json['fantasy_content']['team'])
 
-# stats
+    # stats
     points_url = ('https://fantasysports.yahooapis.com/fantasy/v2/' +
                     f'team/{YAHOO_GAME_ID}.l.{league_id}.t.{team_id}' +
-                "/players;out=metadata,stats,ownership,percent_owned,draft_analysis")
+                    f'/players/stats;type=week;week={week};out=stats')
     points_json = OAUTH.session.get(points_url, params={'format': 'json'}).json()
 
     player_dict = points_json['fantasy_content']['team'][1]['players']
