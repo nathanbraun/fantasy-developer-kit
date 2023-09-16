@@ -33,9 +33,9 @@ def wdis_by_pos(pos, sims, roster, opponent_starters):
                         set(sims.columns))
 
     df['pos'] = pos
-    df.index.name = 'player'
+    df.index.name = 'player_id'
     df.reset_index(inplace=True)
-    df.set_index(['pos', 'player'], inplace=True)
+    df.set_index(['pos', 'player_id'], inplace=True)
 
     # now update roster with start decisions
     current_starter = roster.loc[(roster['team_position'] == pos) &
@@ -89,15 +89,15 @@ if __name__ == '__main__':
     league = db.read_league('league', LEAGUE_ID, conn)
 
     # now import site based on host
-    match league.iloc[0]['host']:
-        case 'fleaflicker':
-            import hosts.fleaflicker as site
-        case 'yahoo':
-            import hosts.yahoo as site
-        case 'espn':
-            import hosts.espn as site
-        case _:
-            raise ValueError('Unknown host')
+    host = league.iloc[0]['host']
+    if host == 'fleaflicker':
+        import hosts.fleaflicker as site
+    elif host == 'yahoo':
+        import hosts.yahoo as site
+    elif host ==  'espn':
+        import hosts.espn as site
+    else:
+        raise ValueError('Unknown host')
 
     # get parameters from league DataFrame
 
@@ -188,6 +188,12 @@ if __name__ == '__main__':
         print(", ".join(players.loc[list(set(current_starters) - set(rec_starters)),
               'name'].values))
         
+    # update df_start with players
+    df_start = (pd.merge(df_start, players[['name']], left_index=True,
+                        right_index=True)
+                .reset_index()
+                .set_index(['pos', 'name'])
+                .drop('player_id', axis=1))
 
     ######################
     # write output to file

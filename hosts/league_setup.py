@@ -14,6 +14,7 @@ LEAGUES = {
         'league_id': 34958,
         'team_id': 217960,
         'scoring': {'qb': 'pass_6', 'skill': 'ppr_1', 'dst': 'dst_high'}},
+
     # 'work-league': {
     #     'host': 'yahoo',
     #     'league_id': 34958,
@@ -44,17 +45,14 @@ if __name__ == '__main__':
         assert scoring['dst'] in ['dst_std', 'dst_high']
 
         # load right helper functions depending on platform
-        match host:
-            case 'fleaflicker':
-                import hosts.fleaflicker as site
-            case 'espn':
-                import hosts.espn as site
-            case 'yahoo':
-                import hosts.yahoo as site
-            case 'sleeper':
-                import hosts.sleeper as site
-            case _:
-                raise ValueError(f"Unknown host: {host}")
+        if host == 'fleaflicker':
+            import hosts.fleaflicker as site
+        elif host == 'yahoo':
+            import hosts.yahoo as site
+        elif host ==  'espn':
+            import hosts.espn as site
+        else:
+            raise ValueError('Unknown host')
 
         # team list
         teams = site.get_teams_in_league(league_id)

@@ -112,15 +112,15 @@ if __name__ == '__main__':
     league = db.read_league('league', LEAGUE_ID, conn)
 
     # now import site based on host
-    match league.iloc[0]['host']:
-        case 'fleaflicker':
-            import hosts.fleaflicker as site
-        case 'yahoo':
-            import hosts.yahoo as site
-        case 'espn':
-            import hosts.espn as site
-        case _:
-            raise ValueError('Unknown host')
+    host = league.iloc[0]['host']
+    if host == 'fleaflicker':
+        import hosts.fleaflicker as site
+    elif host == 'yahoo':
+        import hosts.yahoo as site
+    elif host ==  'espn':
+        import hosts.espn as site
+    else:
+        raise ValueError('Unknown host')
 
     # set other parameters
     host = league.iloc[0]['host']
