@@ -32,6 +32,10 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.14.3 (2023-09-16)
+Take out a few recently added (but non essential) Python features that didn't
+work with Python 3.9 (which is what is in Spyder).
+
 ### v0.14.2 (2023-09-15)
 Fixed a few bugs in intro.py + added a note about Spyder (thanks Hanson!)
 
