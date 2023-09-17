@@ -1,0 +1,17 @@
+name,player_position,team_position,actual,start,team_id,player_id
+Patrick Mahomes,QB,QB,,True,1605156,1091
+Rhamondre Stevenson,RB,RB,,True,1605156,349
+Saquon Barkley,RB,RB,,True,1605156,904
+James Conner,RB,RB/WR/TE,,True,1605156,1121
+DeVonta Smith,WR,WR,19.1,True,1605156,372
+Chris Godwin,WR,WR,,True,1605156,1138
+Darren Waller,TE,TE,,True,1605156,1574
+Younghoe Koo,K,K,,True,1605156,1228
+Dallas Cowboys,D/ST,D/ST,,True,1605156,5159
+Brock Purdy,QB,BN,,False,1605156,156
+Kyren Williams,RB,BN,,False,1605156,167
+Joshua Kelley,RB,BN,,False,1605156,522
+Rashee Rice,WR,BN,,False,1605156,48
+Marvin Mims,WR,BN,,False,1605156,43
+Hunter Henry,TE,BN,,False,1605156,1352
+Sam LaPorta,TE,BN,,False,1605156,68
