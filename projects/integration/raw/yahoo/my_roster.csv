@@ -1,0 +1,16 @@
+name,player_position,team_position,start,team_id,actual,player_id
+Patrick Mahomes,QB,QB,True,1,,1091
+Amon-Ra St. Brown,WR,WR1,True,1,,377
+Calvin Ridley,WR,WR2,True,1,,929
+Nick Chubb,RB,RB1,True,1,,910
+Alexander Mattison,RB,RB2,True,1,4.9,772
+Dallas Goedert,TE,TE,True,1,8.2,974
+Mike Evans,WR,W/R/T,True,1,,1716
+Tua Tagovailoa,QB,Q/W/R/T,True,1,,493
+Kadarius Toney,WR,BN1,False,1,,379
+James Cook,RB,BN2,False,1,,172
+Christian Kirk,WR,BN3,False,1,,933
+Baker Mayfield,QB,BN4,False,1,,890
+Allen Lazard,WR,BN5,False,1,,932
+Elijah Moore,WR,BN6,False,1,,378
+Cooper Kupp,WR,IR,False,1,,1139
