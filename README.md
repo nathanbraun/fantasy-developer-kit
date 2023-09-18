@@ -32,6 +32,10 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.15.0 (2023-09-18)
+Update league integration walkthroughs for 2023 - ESPN, Fleaflicker, Yahoo,
+Sleeper should all be working now. Let me know if issues.
+
 ### v0.14.3 (2023-09-16)
 Take out a few recently added (but non essential) Python features that didn't
 work with Python 3.9 (which is what is in Spyder).

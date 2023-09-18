@@ -1,0 +1,241 @@
+name,player_id,pos,actual,team_position,start,team_id
+Daniel Jones,677,QB,,QB,True,1
+Nick Chubb,910,RB,,RB1,True,1
+Joe Mixon,1106,RB,,RB2,True,1
+A.J. Brown,722,WR,6.9,WR1,True,1
+Deebo Samuel,754,WR,,WR2,True,1
+George Pickens,219,WR,,WR3,True,1
+Dalton Schultz,990,TE,,TE,True,1
+Javonte Williams,346,RB,,FLEX,True,1
+NE,5172,DST,,DEF,True,1
+JAX,5165,DST,,BN,False,1
+Luke Musgrave,69,TE,,BN,False,1
+Rashid Shaheed,315,WR,,BN,False,1
+Keaontay Ingram,191,RB,,BN,False,1
+Kenny Pickett,150,QB,,BN,False,1
+Jahan Dotson,212,WR,,BN,False,1
+Jake Ferguson,255,TE,,BN,False,1
+Gabriel Davis,560,WR,,BN,False,1
+Isaiah Hodgins,564,WR,,BN,False,1
+Gus Edwards,1008,RB,,BN,False,1
+Geno Smith,1883,QB,,BN,False,1
+Lamar Jackson,893,QB,,QB,True,2
+Jahmyr Gibbs,16,RB,,RB1,True,2
+Alvin Kamara,1107,RB,,RB2,True,2
+Stefon Diggs,1541,WR,,WR1,True,2
+Amon-Ra St. Brown,377,WR,,WR2,True,2
+Mike Evans,1716,WR,,WR3,True,2
+George Kittle,1187,TE,,TE,True,2
+Kadarius Toney,379,WR,,FLEX,True,2
+KC,5166,DST,,DEF,True,2
+BUF,5154,DST,,BN,False,2
+Jaylen Warren,199,RB,,BN,False,2
+Sam Howell,151,QB,,BN,False,2
+Justyn Ross,220,WR,,BN,False,2
+Deon Jackson,367,RB,,BN,False,2
+Tyler Conklin,975,TE,,BN,False,2
+Courtland Sutton,930,WR,,BN,False,2
+Raheem Mostert,1651,RB,,BN,False,2
+Cordarrelle Patterson,1957,RB,,BN,False,2
+Ryan Tannehill,2082,QB,,BN,False,2
+Dalton Kincaid,67,TE,,BN,False,2
+Deshaun Watson,1088,QB,,QB,True,3
+Derrick Henry,1303,RB,,RB1,True,3
+Dameon Pierce,174,RB,,RB2,True,3
+Calvin Ridley,929,WR,,WR1,True,3
+Christian Watson,245,WR,,WR2,True,3
+Michael Pittman,557,WR,,WR3,True,3
+Travis Kelce,1976,TE,,TE,True,3
+Diontae Johnson,770,WR,,FLEX,True,3
+TB,5180,DST,,DEF,True,3
+BAL,5153,DST,,BN,False,3
+ATL,5152,DST,,BN,False,3
+Aaron Rodgers,3147,QB,,BN,False,3
+Marvin Mims,43,WR,,BN,False,3
+Devon Achane,21,RB,,BN,False,3
+Tank Bigsby,18,RB,,BN,False,3
+Trey McBride,250,TE,,BN,False,3
+Cade Otton,258,TE,,BN,False,3
+Rashod Bateman,383,WR,,BN,False,3
+Baker Mayfield,890,QB,,BN,False,3
+Kareem Hunt,1113,RB,,BN,False,3
+Justin Herbert,494,QB,,QB,True,4
+Tony Pollard,703,RB,,RB1,True,4
+Isiah Pacheco,206,RB,,RB2,True,4
+Cooper Kupp,1139,WR,,WR1,True,4
+DK Metcalf,720,WR,,WR2,True,4
+Brandon Aiyuk,555,WR,,WR3,True,4
+Dallas Goedert,974,TE,8.2,TE,True,4
+Antonio Gibson,567,RB,,FLEX,True,4
+LAR,5168,DST,,DEF,True,4
+DAL,5159,DST,,BN,False,4
+Tyjae Spears,19,RB,,BN,False,4
+Sean Tucker,20,RB,,BN,False,4
+Puka Nacua,65,WR,,BN,False,4
+Brock Purdy,156,QB,,BN,False,4
+Skyy Moore,222,WR,,BN,False,4
+Brian Robinson,173,RB,,BN,False,4
+Romeo Doubs,235,WR,,BN,False,4
+Nico Collins,380,WR,,BN,False,4
+Juwan Johnson,576,TE,,BN,False,4
+Michael Gallup,946,WR,,BN,False,4
+Trevor Lawrence,327,QB,,QB,True,5
+Najee Harris,344,RB,,RB1,True,5
+Miles Sanders,697,RB,,RB2,True,5
+Justin Jefferson,551,WR,24.9,WR1,True,5
+Jaylen Waddle,374,WR,,WR2,True,5
+Marquise Brown,723,WR,,WR3,True,5
+Pat Freiermuth,421,TE,,TE,True,5
+Rachaad White,178,RB,,FLEX,True,5
+WAS,5182,DST,,DEF,True,5
+PIT,5177,DST,,BN,False,5
+Zay Flowers,44,WR,,BN,False,5
+Michael Mayer,66,TE,,BN,False,5
+Bryce Young,2,QB,,BN,False,5
+Chase Brown,35,RB,,BN,False,5
+Jerome Ford,170,RB,,BN,False,5
+Tyler Allgeier,169,RB,,BN,False,5
+Darnell Mooney,599,WR,,BN,False,5
+Mike White,898,QB,,BN,False,5
+Tyler Higbee,1354,TE,,BN,False,5
+Rashee Rice,48,WR,,BN,False,5
+Dak Prescott,1297,QB,,QB,True,6
+Saquon Barkley,904,RB,,RB1,True,6
+Rhamondre Stevenson,349,RB,,RB2,True,6
+Garrett Wilson,210,WR,,WR1,True,6
+Chris Godwin,1138,WR,,WR2,True,6
+Brandin Cooks,1719,WR,,WR3,True,6
+T.J. Hockenson,756,TE,25.6,TE,True,6
+Michael Thomas,1329,WR,,FLEX,True,6
+SEA,5178,DST,,DEF,True,6
+NYJ,5175,DST,,BN,False,6
+Jordan Love,497,QB,,BN,False,6
+Hunter Renfrow,741,WR,,BN,False,6
+Damien Harris,693,RB,,BN,False,6
+Noah Fant,755,TE,,BN,False,6
+Marquez Valdes-Scantling,993,WR,,BN,False,6
+Rashaad Penny,908,RB,2.4,BN,False,6
+Hayden Hurst,980,TE,,BN,False,6
+Zay Jones,1151,WR,,BN,False,6
+Odell Beckham,1724,WR,,BN,False,6
+Jimmy Garoppolo,1757,QB,,BN,False,6
+Joe Burrow,492,QB,,QB,True,7
+Dalvin Cook,1103,RB,,RB1,True,7
+David Montgomery,689,RB,,RB2,True,7
+CeeDee Lamb,547,WR,,WR1,True,7
+Davante Adams,1720,WR,,WR2,True,7
+Amari Cooper,1530,WR,,WR3,True,7
+Kyle Pitts,419,TE,,TE,True,7
+Terry McLaurin,727,WR,,FLEX,True,7
+MIA,5170,DST,,DEF,True,7
+IND,5164,DST,,BN,False,7
+DET,5161,DST,,BN,False,7
+Kendre Miller,25,RB,,BN,False,7
+Evan Hull,34,RB,,BN,False,7
+Elijah Moore,378,WR,,BN,False,7
+Elijah Mitchell,353,RB,,BN,False,7
+Jakobi Meyers,745,WR,,BN,False,7
+Taysom Hill,1241,TE,,BN,False,7
+Gerald Everett,1175,TE,,BN,False,7
+Ezekiel Elliott,1302,RB,,BN,False,7
+Jared Goff,1288,QB,,BN,False,7
+Patrick Mahomes,1091,QB,,QB,True,8
+Travis Etienne,343,RB,,RB1,True,8
+Aaron Jones,1194,RB,,RB2,True,8
+Tyreek Hill,1371,WR,,WR1,True,8
+Jerry Jeudy,548,WR,,WR2,True,8
+Tyler Lockett,1542,WR,,WR3,True,8
+Cole Kmet,582,TE,,TE,True,8
+AJ Dillon,520,RB,,FLEX,True,8
+NO,5173,DST,,DEF,True,8
+LV,5169,DST,,BN,False,8
+GB,5162,DST,,BN,False,8
+Jordan Addison,40,WR,16.2,BN,False,8
+Zach Charbonnet,23,RB,,BN,False,8
+Jalin Hyatt,37,WR,,BN,False,8
+Ty Chandler,180,RB,2.9,BN,False,8
+Chigoziem Okonkwo,266,TE,,BN,False,8
+K.J. Osborn,600,WR,12.4,BN,False,8
+Matthew Stafford,2621,QB,,BN,False,8
+D'Onta Foreman,1109,RB,,BN,False,8
+Derek Carr,1689,QB,,BN,False,8
+Jalen Hurts,498,QB,28.15,QB,True,9
+Kenneth Walker III,168,RB,,RB1,True,9
+D'Andre Swift,512,RB,27.1,RB2,True,9
+Ja'Marr Chase,371,WR,,WR1,True,9
+DeVonta Smith,372,WR,23.1,WR2,True,9
+Drake London,208,WR,,WR3,True,9
+Sam LaPorta,68,TE,,TE,True,9
+Christian Kirk,933,WR,,FLEX,True,9
+SF,5179,DST,,DEF,True,9
+NYG,5174,DST,,BN,False,9
+C.J. Stroud,4,QB,,BN,False,9
+Deuce Vaughn,30,RB,,BN,False,9
+Nathaniel Dell,58,WR,,BN,False,9
+Treylon Burks,209,WR,,BN,False,9
+Isaiah Likely,254,TE,,BN,False,9
+Khalil Herbert,361,RB,,BN,False,9
+Devin Singletary,698,RB,,BN,False,9
+Dawson Knox,761,TE,,BN,False,9
+Josh Reynolds,1143,WR,,BN,False,9
+Jerick McKinnon,1758,RB,,BN,False,9
+Tua Tagovailoa,493,QB,,QB,True,10
+Austin Ekeler,1229,RB,,RB1,True,10
+Josh Jacobs,691,RB,,RB2,True,10
+Keenan Allen,1954,WR,,WR1,True,10
+DeAndre Hopkins,1964,WR,,WR2,True,10
+Mike Williams,1129,WR,,WR3,True,10
+Darren Waller,1574,TE,,TE,True,10
+Cam Akers,514,RB,,FLEX,True,10
+TEN,5181,DST,,DEF,True,10
+CIN,5157,DST,,BN,False,10
+CAR,5155,DST,,BN,False,10
+Greg Dulcich,253,TE,,BN,False,10
+Rondale Moore,373,WR,,BN,False,10
+Kenneth Gainwell,345,RB,,BN,False,10
+Van Jefferson,573,WR,,BN,False,10
+Donovan Peoples-Jones,572,WR,,BN,False,10
+Mike Gesicki,972,TE,,BN,False,10
+Adam Thielen,1832,WR,,BN,False,10
+Russell Wilson,2088,QB,,BN,False,10
+Kirk Cousins,2085,QB,40.2,BN,False,10
+Justin Fields,328,QB,,QB,True,11
+Bijan Robinson,15,RB,,RB1,True,11
+J.K. Dobbins,515,RB,,RB2,True,11
+Chris Olave,211,WR,,WR1,True,11
+D.J. Moore,935,WR,,WR2,True,11
+Quentin Johnston,42,WR,,WR3,True,11
+Mark Andrews,971,TE,,TE,True,11
+Evan Engram,1164,TE,,FLEX,True,11
+LAC,5167,DST,,DEF,True,11
+DEN,5160,DST,,BN,False,11
+Anthony Richardson,6,QB,,BN,False,11
+Desmond Ridder,155,QB,,BN,False,11
+James Cook,172,RB,,BN,False,11
+Chuba Hubbard,351,RB,,BN,False,11
+Allen Lazard,932,WR,,BN,False,11
+Jamaal Williams,1114,RB,,BN,False,11
+Tyler Boyd,1327,WR,,BN,False,11
+Roschon Johnson,29,RB,,BN,False,11
+Jonathan Mingo,51,WR,,BN,False,11
+Jayden Reed,38,WR,,BN,False,11
+Josh Allen,889,QB,,QB,True,12
+Christian McCaffrey,1105,RB,,RB1,True,12
+Jonathan Taylor,517,RB,,RB2,True,12
+Tee Higgins,550,WR,,WR1,True,12
+Jaxon Smith-Njigba,39,WR,,WR2,True,12
+JuJu Smith-Schuster,1131,WR,,WR3,True,12
+David Njoku,1167,TE,,TE,True,12
+Breece Hall,165,RB,,FLEX,True,12
+PHI,5176,DST,8.0,DEF,True,12
+CLE,5158,DST,,BN,False,12
+Jameson Williams,213,WR,,BN,False,12
+Alec Pierce,224,WR,,BN,False,12
+Wan'Dale Robinson,214,WR,,BN,False,12
+Mac Jones,331,QB,,BN,False,12
+Irv Smith Jr.,759,TE,,BN,False,12
+Alexander Mattison,772,RB,4.9,BN,False,12
+Kyler Murray,674,QB,,BN,False,12
+D.J. Chark,968,WR,,BN,False,12
+Samaje Perine,1108,RB,,BN,False,12
+James Conner,1121,RB,,BN,False,12

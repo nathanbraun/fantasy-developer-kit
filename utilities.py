@@ -45,7 +45,11 @@ DB_PATH = config['sdk']['DB_PATH']
 YAHOO_FILE = config['yahoo']['FILE']
 YAHOO_KEY =  config['yahoo']['KEY']
 YAHOO_SECRET = config['yahoo']['SECRET']
+
 YAHOO_GAME_ID = 423  # changes every year - 423 for 2023
+# endpoint to find YAHOO_GAME_ID:
+# 'https://fantasysports.yahooapis.com/fantasy/v2/game/nfl'
+# (need to query through yahoo oauth)
 
 # espn
 SWID = config['espn']['SWID']
@@ -100,6 +104,7 @@ def master_player_lookup(token):
     query_players = """
         query {
             players {
+                name,
                 player_id,
                 pos,
                 fleaflicker_id,

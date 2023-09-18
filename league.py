@@ -119,6 +119,8 @@ if __name__ == '__main__':
         import hosts.yahoo as site
     elif host ==  'espn':
         import hosts.espn as site
+    elif host ==  'sleeper':
+        import hosts.sleeper as site
     else:
         raise ValueError('Unknown host')
 

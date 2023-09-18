@@ -14,14 +14,12 @@ LEAGUES = {
         'league_id': 34958,
         'team_id': 217960,
         'scoring': {'qb': 'pass_6', 'skill': 'ppr_1', 'dst': 'dst_high'}},
-
-    # 'work-league': {
-    #     'host': 'yahoo',
+    # add new leagues here in same format (uncomment)
+    # 'your-league': {
+    #     'host': 'espn',
     #     'league_id': 34958,
     #     'team_id': 217960,
     #     'scoring': {'qb': 'pass_6', 'skill': 'ppr_1', 'dst': 'dst_high'}},
-
-    # add new leagues here in same format
 }
 
 ##################################################
@@ -51,6 +49,8 @@ if __name__ == '__main__':
             import hosts.yahoo as site
         elif host ==  'espn':
             import hosts.espn as site
+        elif host ==  'sleeper':
+            import hosts.sleeper as site
         else:
             raise ValueError('Unknown host')
 

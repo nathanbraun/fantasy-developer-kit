@@ -3,7 +3,7 @@ import json
 import numpy as np
 from pandas import DataFrame, Series
 import pandas as pd
-from utilities import (LICENSE_KEY, generate_token, master_player_lookup)
+from utilities import (LICENSE_KEY, generate_token, master_player_lookup, SEASON)
 pd.options.mode.chained_assignment = None
 
 ######################
@@ -41,6 +41,8 @@ def get_league_schedule(league_id, example=False):
     settings_json = requests.get(settings_url).json()
 
     n = settings_json['settings']['playoff_week_start']
+    if n == 0:
+        n = 19
     return pd.concat(
         [_get_schedule_by_week(league_id, x) for x in range(1, n)], ignore_index=True)
 
@@ -78,7 +80,7 @@ def _get_team_roster(team, lookup, positions):
                 inplace=True)
     team_df.rename(columns={'position': 'player_position'}, inplace=True)
     team_df['start'] = team_df['team_position'] != 'BN'
-    team_df['name'] = team_df['fantasymath_id'].str.replace('-', ' ').str.title()
+    # team_df['name'] = team_df['player_id'].str.replace('-', ' ').str.title()
     team_df['team_id'] = team['roster_id']
     return team_df
 
@@ -89,15 +91,16 @@ def _get_schedule_by_week(league_id, week):
     team_sched = DataFrame([_proc_team_schedule(team) for team in matchup_json])
 
     team_sched_wide = pd.merge(
-        team_sched.drop_duplicates('game_id', keep='first'),
-        team_sched.drop_duplicates('game_id', keep='last'), on='game_id')
+        team_sched.drop_duplicates('matchup_id', keep='first'),
+        team_sched.drop_duplicates('matchup_id', keep='last'), on='matchup_id')
 
     team_sched_wide.rename(
         columns={'team_id_x': 'team1_id', 'team_id_y': 'team2_id'},
         inplace=True)
 
-    team_sched_wide['season'] = 2021
+    team_sched_wide['season'] = SEASON
     team_sched_wide['week'] = week
+    team_sched_wide['league_id'] = league_id
     return team_sched_wide
 
 def _add_pos_suffix(df_subset):
@@ -118,12 +121,12 @@ def _proc_team(team, team_id):
 def _proc_team_schedule(team):
     dict_to_return = {}
     dict_to_return['team_id'] = team['roster_id']
-    dict_to_return['game_id'] = team['matchup_id']
+    dict_to_return['matchup_id'] = team['matchup_id']
     return dict_to_return
 
 if __name__ == '__main__':
-    league_id = 717250053961510912
-    week = 3
+    league_id = 1002102487509295104
+    week = 2
 
     token = generate_token(LICENSE_KEY)['token']
     lookup = master_player_lookup(token)
