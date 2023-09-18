@@ -32,18 +32,21 @@ def summarize_matchup(sims_a, sims_b):
     total_b = sims_b.sum(axis=1)
 
     # get win prob
-    winprob_a = round((total_a > total_b).mean(), 2)
-    winprob_b = round(1 - winprob_a, 2)
+    winprob_a = (total_a > total_b).mean()
+    winprob_b = 1 - winprob_a
 
     # get over-under
-    over_under = round((total_a + total_b).median(), 2)
+    over_under = (total_a + total_b).median()
 
-    # line
-    line = round((total_a - total_b).median(), 2)
-    line = round((line*2)/2, 2)
+    # spread
+    spread = (total_a - total_b).median().round(2)
+    spread = round(spread*2)/2
 
-    return {'wp_a': winprob_a, 'wp_b': winprob_b, 'over_under': over_under,
-            'line': line}
+    # moneyline
+    ml_a = wp_to_ml(winprob_a)
+
+    return {'wp_a': round(winprob_a, 2), 'wp_b': round(winprob_b, 2),
+            'over_under': round(over_under, 2), 'spread': spread, 'ml': ml_a}
 
 def summarize_team(sims):
     """
@@ -95,6 +98,12 @@ def photo_finish(df):
 
     return df.loc[closest_matchup_id].to_dict()
 
+def wp_to_ml(wp):
+    if wp > 0.5:
+        return int(round(-1*(100/((1 - wp)) - 100), 0))
+    else:
+        return int(round((100/((wp)) - 100), 0))
+
 if __name__ == '__main__':
 
     try:
@@ -134,8 +143,8 @@ if __name__ == '__main__':
 
     # then load rosters
     token = generate_token(LICENSE_KEY)['token']
-    player_lookup = master_player_lookup(token)
-    rosters = site.get_league_rosters(player_lookup, LEAGUE_ID, WEEK)
+    # player_lookup = master_player_lookup(token)
+    # rosters = site.get_league_rosters(player_lookup, LEAGUE_ID, WEEK)
 
     # and get sims
     sims = get_sims_from_roster(token, rosters, nsims=1000, **league_scoring)

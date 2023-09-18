@@ -1,8 +1,9 @@
 import numpy as np
 from pandas import DataFrame, Series
 import pandas as pd
-from utilities import (LICENSE_KEY, generate_token, master_player_lookup,
-                       YAHOO_FILE, YAHOO_KEY, YAHOO_SECRET, YAHOO_GAME_ID)
+from utilities import (
+    LICENSE_KEY, generate_token, master_player_lookup, YAHOO_FILE, YAHOO_KEY,
+    YAHOO_SECRET, YAHOO_GAME_ID, SEASON)
 import json
 from yahoo_oauth import OAuth2
 from pathlib import Path
@@ -30,7 +31,6 @@ OAUTH.session.get(game_url, params={'format': 'json'}).json()
 LEAGUE_ID = 39252
 TEAM_ID = 1
 WEEK = 2
-SEASON = 2023
 USE_SAVED_DATA = True
 
 roster_url = ('https://fantasysports.yahooapis.com/fantasy/v2' +

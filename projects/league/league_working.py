@@ -7,85 +7,79 @@ from pathlib import Path
 import seaborn as sns
 from textwrap import dedent
 from pandas import DataFrame
-from utilities import (get_sims, generate_token, LICENSE_KEY, DB_PATH,
-                       OUTPUT_PATH, master_player_lookup, get_players,
-                       schedule_long)
+from hosts.league_setup import LEAGUES
+from utilities import (get_sims, get_sims_from_file, generate_token,
+    LICENSE_KEY, DB_PATH, OUTPUT_PATH, master_player_lookup, get_players,
+    schedule_long, name_sims, get_sims_from_roster, get_players, SEASON)
 
+USE_SAVED_DATA = True
 
-LEAGUE_ID = 316893
-WEEK = 2
+if USE_SAVED_DATA:
+    LEAGUE = 'nate-league'
+    WEEK = 2
+else:
+    # needs to be in hosts/league_setup.py
+    LEAGUE = 'put-your-league-here'
+    WEEK = 2
 
-# open up our database connection
-# conn = sqlite3.connect(DB_PATH)  # real path to db
+#################
+# get data inputs
+#################
 
-conn = sqlite3.connect('./projects/integration/raw/wdis/fantasy.sqlite')
+# load league data (teams, schedule and scoring settings) from DB
 
-#######################################
-# load team and schedule data from DB
-#######################################
+LEAGUE_ID = LEAGUES[LEAGUE]['league_id']
 
-###############################################################################
-# note: need to run ./hosts/league_setup.py before using w/ your league
-###############################################################################
-
+conn = sqlite3.connect(DB_PATH)
 teams = db.read_league('teams', LEAGUE_ID, conn)
 schedule = db.read_league('schedule', LEAGUE_ID, conn)
 league = db.read_league('league', LEAGUE_ID, conn)
+host = league.iloc[0]['host']
 
-# set other parameters
-TEAM_ID = league.iloc[0]['team_id']
-HOST = league.iloc[0]['host']
-SCORING = {}
-SCORING['qb'] = league.iloc[0]['qb_scoring']
-SCORING['skill'] = league.iloc[0]['skill_scoring']
-SCORING['dst'] = league.iloc[0]['dst_scoring']
+# get rosters
 
-##############
-# then rosters
-##############
+if USE_SAVED_DATA:
+    rosters = (pd.read_csv(
+        './projects/integration/raw/fleaflicker/league_rosters.csv')
+        .query("start"))
+    sims = get_sims_from_file('./projects/league/raw/sims.csv')
+else:
+    token = generate_token(LICENSE_KEY)['token']
+    player_lookup = master_player_lookup(token)
 
-# normally:
+    # now import site based on host
+    if host == 'fleaflicker':
+        import hosts.fleaflicker as site
+    elif host == 'yahoo':
+        import hosts.yahoo as site
+    elif host ==  'espn':
+        import hosts.espn as site
+    elif host ==  'sleeper':
+        import hosts.sleeper as site
+    else:
+        raise ValueError('Unknown host')
 
-token = generate_token(LICENSE_KEY)['token']
-# player_lookup = master_player_lookup(token)
-# rosters = (site.get_league_rosters(player_lookup, LEAGUE_ID)
-#            .query("start"))
+    league_scoring = {
+        'qb':league.iloc[0]['qb_scoring'],
+        'skill': league.iloc[0]['skill_scoring'],
+        'dst': league.iloc[0]['dst_scoring']
+    }
 
-# for walkthrough:
-player_lookup = pd.read_csv('./projects/league/raw/player_lookup.csv')
-rosters = pd.read_csv('./projects/league/raw/rosters.csv').query("start")
+    rosters = site.get_league_rosters(player_lookup, LEAGUE_ID, WEEK)
+    sims = get_sims_from_roster(token, rosters, nsims=1000, **league_scoring)
 
-# normally:
-# available_players = get_players(token, week=WEEK, season=2021, **SCORING)
-# sims = get_sims(token, (set(rosters['fantasymath_id']) &
-#                  set(available_players['fantasymath_id'])),
-#                 week=WEEK, season=2021, nsims=1000, **SCORING)
+#########################
+# walkthrough starts here
+#########################
 
-# for walkthrough:
-sims = pd.read_csv('./projects/league/raw/sims.csv')
+# what we're starting with
+teams
+schedule.head(10)
+rosters.head()
 
-sims[['terry-mclaurin', 'sterling-shepard', 'antonio-gibson', 'was-dst',
-    'logan-thomas']].head()
-sims[['terry-mclaurin', 'sterling-shepard', 'antonio-gibson', 'was-dst',
-    'logan-thomas']].describe().round(2)
+rosters.query("actual.notnull()")[['name', 'actual']]
 
-players_w_pts = rosters.loc[rosters['actual'].notnull(), ['fantasymath_id', 'actual']]
-
-(sims['sterling-shepard'] <= 8.5).mean()
-
-percentiles = [(sims[player] <= pts).mean() for player, pts in
-    zip(players_w_pts['fantasymath_id'], players_w_pts['actual'])]
-
-players_w_pts['pctile'] = percentiles
-players_w_pts
-
-players_w_pts['pctile'].mean()
-
-for player, pts in zip(players_w_pts['fantasymath_id'],
-                       players_w_pts['actual']):
-    sims[player] = pts
-
-sims[['patrick-mahomes', 'davante-adams', 'sterling-shepard']].head(5)
+sims[[6, 689, 551]].head()
 
 ########################################################
 # load weekly lineup, matchup info
@@ -95,12 +89,12 @@ schedule_this_week = schedule.query(f"week == {WEEK}")
 schedule_this_week
 
 team1 = 1605156
-team2 = 1605155
+team2 = 1605147
 
-rosters.query(f"team_id == {team1}")['fantasymath_id']
+rosters.query(f"team_id == {team1}")['player_id']
 
 def lineup_by_team(team_id):
-    return rosters.query(f"team_id == {team_id} & fantasymath_id.notnull()")['fantasymath_id']
+    return rosters.query(f"team_id == {team_id} & player_id.notnull()")['player_id']
 
 team1_roster = lineup_by_team(team1)
 sims[team1_roster].head()
@@ -115,14 +109,22 @@ pd.concat([team1_pts, team2_pts], axis=1).head(10)
 team1_wp = (team1_pts > team2_pts).mean()
 team1_wp
 
-line = (team1_pts - team2_pts).median()
-line
+spread = (team1_pts - team2_pts).median()
+spread
 
-line = round(line*2)/2
-line
+spread = round(spread*2)/2
+spread
 
 over_under = (team1_pts + team2_pts).median()
 over_under
+
+def wp_to_ml(wp):
+    if wp > 0.5:
+        return int(round(-1*(100/((1 - wp)) - 100), 0))
+    else:
+        return int(round((100/((wp)) - 100), 0))
+
+wp_to_ml(team1_wp)
 
 def summarize_matchup(sims_a, sims_b):
     """
@@ -135,18 +137,21 @@ def summarize_matchup(sims_a, sims_b):
     total_b = sims_b.sum(axis=1)
 
     # get win prob
-    winprob_a = (total_a > total_b).mean().round(2)
-    winprob_b = 1 - winprob_a.round(2)
+    winprob_a = (total_a > total_b).mean()
+    winprob_b = 1 - winprob_a
 
     # get over-under
-    over_under = (total_a + total_b).median().round(2)
+    over_under = (total_a + total_b).median()
 
-    # line
-    line = (total_a - total_b).median().round(2)
-    line = round(line*2)/2
+    # spread
+    spread = (total_a - total_b).median().round(2)
+    spread = round(spread*2)/2
 
-    return {'wp_a': winprob_a, 'wp_b': winprob_b, 'over_under': over_under,
-            'line': line}
+    # moneyline
+    ml_a = wp_to_ml(winprob_a)
+
+    return {'wp_a': round(winprob_a, 2), 'wp_b': round(winprob_b, 2),
+            'over_under': round(over_under, 2), 'spread': spread, 'ml': ml_a}
 
 summarize_matchup(sims[team1_roster], sims[team2_roster])
 
@@ -338,6 +343,10 @@ pd.concat([
     low_score.describe(percentiles=[.05, .25, .5, .75, .95])], axis=1)
 
 
+team_df.round(2)
+
+team_df['75%'] - team_df['25%']
+
 # add owner
 team_df = (pd.merge(team_df, teams[['team_id', 'owner_name']], left_index=True,
                    right_on = 'team_id')
@@ -347,7 +356,7 @@ team_df = (pd.merge(team_df, teams[['team_id', 'owner_name']], left_index=True,
 team_df.round(2)
 
 league_wk_output_dir = path.join(
-    OUTPUT_PATH, f'{HOST}_{LEAGUE_ID}_2021-{str(WEEK).zfill(2)}')
+    OUTPUT_PATH, f'{host}_{LEAGUE_ID}_{SEASON}-{str(WEEK).zfill(2)}')
 
 Path(league_wk_output_dir).mkdir(exist_ok=True, parents=True)
 
@@ -358,7 +367,7 @@ with open(output_file, 'w') as f:
     print(dedent(
         f"""
         **********************************
-        Matchup Projections, Week {WEEK} - 2021
+        Matchup Projections, Week {WEEK} - {SEASON}
         **********************************
         """), file=f)
     print(matchup_df, file=f)
@@ -366,7 +375,7 @@ with open(output_file, 'w') as f:
     print(dedent(
         f"""
         ********************************
-        Team Projections, Week {WEEK} - 2021
+        Team Projections, Week {WEEK} - {SEASON}
         ********************************
         """), file=f)
 
@@ -401,7 +410,7 @@ totals_by_team.stack().head()
 teams_long = totals_by_team.stack().reset_index()
 teams_long.columns = ['sim', 'team_id', 'pts']
 
-teams_long.head()
+teams_long.head(15)
 
 # plot
 g = sns.FacetGrid(teams_long.replace(team_to_owner), hue='team_id', aspect=2)
