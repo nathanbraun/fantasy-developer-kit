@@ -169,7 +169,8 @@ def _process_team(team):
 def _process_member(member):
     dict_to_return = {}
     dict_to_return['owner_id'] = member['id']
-    dict_to_return['owner_name'] = member['displayName']
+    dict_to_return['owner_name'] = (member['firstName'] + ' ' +
+        member['lastName'][0]).title()
     return dict_to_return
 
 

@@ -16,6 +16,7 @@ pd.options.mode.chained_assignment = None
 LEAGUE_ID = 395209553
 TEAM_ID = 12
 USE_SAVED_DATA = True
+WEEK = 2
 
 ###############################################################################
 # roster data
@@ -155,14 +156,16 @@ else:
     boxscore_json = requests.get(boxscore_url, cookies={'swid': SWID, 'espn_s2':
                                                         ESPN_S2}).json()
 
-matchup_list = [x for x in boxscore_json['schedule'] if x['matchupPeriodId'] == 2]
-# scores = pd.concat([_proc_played_matchup(x) for x in matchup_list])
-matchup2 = matchup_list[2]
-matchup2_home = matchup2['home']
-matchup2_home_roster = matchup2['home']['rosterForMatchupPeriod']['entries']
-devonta_dict = matchup2_home_roster[0]
+# only week 2 matchups
+matchup_list = [x for x in boxscore_json['schedule']
+                if x['matchupPeriodId'] == WEEK]
 
-# devonta_dict
+matchup0 = matchup_list[0]
+matchup0_away = matchup0['away']
+matchup0_away_roster = matchup0['away']['rosterForMatchupPeriod']['entries']
+cousins_dict = matchup0_away_roster[0]
+
+cousins_dict
 
 def proc_played_player(player):
     dict_to_return = {}
@@ -172,7 +175,7 @@ def proc_played_player(player):
         ['player']['stats'][0]['appliedTotal'])
     return dict_to_return
 
-proc_played_player(devonta_dict)
+proc_played_player(cousins_dict)
 
 def proc_played_team(team):
     if 'rosterForMatchupPeriod' in team.keys():
@@ -181,10 +184,10 @@ def proc_played_team(team):
     else:
         return DataFrame()
 
-matchup0 = matchup_list[0]
-matchup0_away = matchup2['away']
+matchup2 = matchup_list[2]
+matchup2_home = matchup2['home']
 
-proc_played_team(matchup0_away)
+proc_played_team(matchup2_home)
 
 def proc_played_matchup(matchup):
     return pd.concat([proc_played_team(matchup['home']),
@@ -204,11 +207,12 @@ if scores.empty:
     scores = DataFrame(columns=['espn_id', 'actual'])
 
 all_rosters_w_pts = pd.merge(all_rosters, scores, how='left')
+all_rosters_w_pts.head(15)
 
 from utilities import (LICENSE_KEY, generate_token, master_player_lookup)
 
 if USE_SAVED_DATA:
-    fantasymath_players = pd.read_csv('./projects/integration/raw/lookup.csv')
+    fantasymath_players = pd.read_csv('./projects/integration/raw/espn/lookup.csv')
 else:
     token = generate_token(LICENSE_KEY)['token']
     fantasymath_players = master_player_lookup(token)
@@ -290,7 +294,7 @@ def process_team(team):
 def process_member(member):
     dict_to_return = {}
     dict_to_return['owner_id'] = member['id']
-    dict_to_return['owner_name'] = member['displayName']
+    dict_to_return['owner_name'] = (member['firstName'] + ' ' + member['lastName'][0]).title()
     return dict_to_return
 
 DataFrame([process_team(team) for team in teams_list])
