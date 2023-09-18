@@ -181,7 +181,8 @@ names['flex'].value_counts(normalize=True)
 usage = pd.concat([names[x].value_counts(normalize=True) for x in pos],
                   axis=1, join='outer').fillna(0)
 
-usage.columns = [x.upper() for x in usage.columns]
+# usage.columns = [x.upper() for x in usage.columns]
+usage.columns = [x.upper() for x in pos]
 usage['ALL'] = usage.sum(axis=1)
 
 usage
