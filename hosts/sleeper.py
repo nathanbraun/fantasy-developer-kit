@@ -16,9 +16,12 @@ def get_league_rosters(lookup, league_id, week):
     settings_url = f'https://api.sleeper.app/v1/league/{league_id}'
     settings_json = requests.get(settings_url).json()
 
-    return pd.concat([_get_team_roster(x, lookup,
-                                      settings_json['roster_positions']) for x
-                      in matchup_json], ignore_index=True)
+    roster_url = f'https://api.sleeper.app/v1/league/{league_id}/rosters'
+    roster_json = requests.get(roster_url).json()
+    return pd.concat([_get_team_roster(
+        m, lookup, settings_json['roster_positions'], r['starters'])
+        for m, r in zip(matchup_json, roster_json)], ignore_index=True)
+
 
 def get_teams_in_league(league_id, example=False):
     teams_url = f'https://api.sleeper.app/v1/league/{league_id}/users'
@@ -50,12 +53,17 @@ def get_league_schedule(league_id, example=False):
 # helper functions
 ##################
 
-def _get_team_roster(team, lookup, positions):
+def _get_team_roster(team, lookup, positions, rstarters=None):
     # starters
-    starters = Series(team['starters']).to_frame('sleeper_id')
+    if team['starters'] is None:
+        starters = Series(rstarters).to_frame('sleeper_id')
+        starter_points = [0 for x in rstarters]
+    else:
+        starters = Series(team['starters']).to_frame('sleeper_id')
+        starter_points = team['starters_points']
 
     starters_w_info = pd.merge(starters, lookup, how='left')
-    starters_w_info['actual'] = team['starters_points']
+    starters_w_info['actual'] = starter_points
     starters_w_info.loc[starters_w_info['actual'] == 0, 'actual'] = np.nan
     starters_w_info['team_position'] = [x for x in positions if x != 'BN']
 
@@ -69,7 +77,7 @@ def _get_team_roster(team, lookup, positions):
     players_w_info['actual'] = (
         players_w_info['sleeper_id'].replace(team['players_points']))
 
-    bench_players = set(team['players']) - set(team['starters'])
+    bench_players = set(team['players']) - set(starters)
 
     bench_df = players_w_info.query(f"sleeper_id in {tuple(bench_players)}")
     bench_df['team_position'] = 'BN'
@@ -78,7 +86,7 @@ def _get_team_roster(team, lookup, positions):
     team_df = pd.concat([starters_pos, bench_df], ignore_index=True)
     team_df.drop(['yahoo_id', 'espn_id', 'fleaflicker_id', 'sleeper_id'], axis=1,
                 inplace=True)
-    team_df.rename(columns={'position': 'player_position'}, inplace=True)
+    team_df.rename(columns={'pos': 'player_position'}, inplace=True)
     team_df['start'] = team_df['team_position'] != 'BN'
     # team_df['name'] = team_df['player_id'].str.replace('-', ' ').str.title()
     team_df['team_id'] = team['roster_id']
