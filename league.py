@@ -14,7 +14,7 @@ from utilities import (generate_token, LICENSE_KEY, DB_PATH,
 # set parameters here
 #####################
 LEAGUE = 'nate-league'
-WEEK = 2
+WEEK = 3
 WRITE_OUTPUT = False
 
 ##############################################
@@ -143,8 +143,8 @@ if __name__ == '__main__':
 
     # then load rosters
     token = generate_token(LICENSE_KEY)['token']
-    # player_lookup = master_player_lookup(token)
-    # rosters = site.get_league_rosters(player_lookup, LEAGUE_ID, WEEK)
+    player_lookup = master_player_lookup(token)
+    rosters = site.get_league_rosters(player_lookup, LEAGUE_ID, WEEK)
 
     # and get sims
     sims = get_sims_from_roster(token, rosters, nsims=1000, **league_scoring)
