@@ -32,6 +32,10 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.16.0 (2023-09-20)
+Update bestball chapter + include bestball/sleeper integration. Also a few
+changes to sleeper integration.
+
 ### v0.15.0 (2023-09-18)
 Update league integration walkthroughs for 2023 - ESPN, Fleaflicker, Yahoo,
 Sleeper should all be working now. Let me know if issues.
