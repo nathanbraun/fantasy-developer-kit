@@ -14,6 +14,11 @@ LEAGUES = {
         'league_id': 316893,
         'team_id': 1605156,
         'scoring': {'qb': 'pass_4', 'skill': 'ppr_0', 'dst': 'dst_std'}},
+    'bball': {
+        'host': 'sleeper',
+        'league_id': 1002102487509295104,
+        'team_id': 4,
+        'scoring': {'qb': 'pass_6', 'skill': 'ppr_1', 'dst': 'dst_std'}},
     # add new leagues here in same format (uncomment)
     # 'your-league': {
     #     'host': 'espn',

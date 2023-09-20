@@ -239,7 +239,7 @@ team0
 
 def proc_team_schedule(team):
     dict_to_return = {}
-    dict_to_return['team_id'] = team['roster_id']
+    dict_to_return['roster_id'] = team['roster_id']
     dict_to_return['game_id'] = team['matchup_id']
     return dict_to_return
 
@@ -248,6 +248,18 @@ proc_team_schedule(team0)
 schedule_w2 = DataFrame([proc_team_schedule(team) for team in matchup_json])
 
 schedule_w2
+
+# problem ids ("roster_id") here aren't available all the time
+# let's use owner ids instead
+# that's available in rosters
+
+roster0 = roster_json[0]
+
+def roster_team_lookup(roster):
+    return {'roster_id': roster['roster_id'], 'team_id': roster['owner_id']}
+
+rteams = DataFrame([roster_team_lookup(x) for x in roster_json])
+schedule_w2 = pd.merge(schedule_w2, rteams, on='roster_id')
 
 schedule_w2_wide = pd.merge(
     schedule_w2.drop_duplicates('game_id', keep='first'),
@@ -265,10 +277,15 @@ schedule_w2_wide
 
 def get_schedule_by_week(league_id, week):
     matchup_url = f'https://api.sleeper.app/v1/league/{league_id}/matchups/{week}'
-
     matchup_json = requests.get(matchup_url).json()
 
+    roster_url = f'https://api.sleeper.app/v1/league/{league_id}/rosters'
+    roster_json = requests.get(roster_url).json()
+
     team_sched = DataFrame([proc_team_schedule(team) for team in matchup_json])
+
+    rteams = DataFrame([roster_team_lookup(x) for x in roster_json])
+    team_sched = pd.merge(team_sched, rteams).drop('roster_id', axis=1)
 
     team_sched_wide = pd.merge(
         team_sched.drop_duplicates('game_id', keep='first'),
