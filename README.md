@@ -32,6 +32,9 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.16.1 (2023-11-03)
+Fix code to deal with ESPN API change.
+
 ### v0.16.0 (2023-09-20)
 Update bestball chapter + include bestball/sleeper integration. Also a few
 changes to sleeper integration.
