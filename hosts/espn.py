@@ -57,15 +57,11 @@ def get_teams_in_league(league_id, example=False):
         teams_json = requests.get(teams_url, cookies={'swid': SWID, 'espn_s2':
                                                       ESPN_S2}).json()
     teams_list = teams_json['teams']
-    members_list = teams_json['members']
 
     teams_df = DataFrame([_process_team(team) for team in teams_list])
-    member_df = DataFrame([_process_member(member) for member in members_list])
+    teams_df['league_id'] = league_id
 
-    comb = pd.merge(teams_df, member_df)
-    comb['league_id'] = league_id
-
-    return comb
+    return teams_df
 
 def get_league_schedule(league_id, example=False):
     schedule_url = f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}/segments/0/leagues/{league_id}?view=mBoxscore'
@@ -164,13 +160,15 @@ def _process_team(team):
     dict_to_return = {}
     dict_to_return['team_id'] = team['id']
     dict_to_return['owner_id'] = team['owners'][0]
+    dict_to_return['owner_name'] = team['name']
     return dict_to_return
 
-def _process_member(member):
+def _process_member(member, team):
     dict_to_return = {}
     dict_to_return['owner_id'] = member['id']
-    dict_to_return['owner_name'] = (member['firstName'] + ' ' +
-        member['lastName'][0]).title()
+    # dict_to_return['owner_name'] = (member['firstName'] + ' ' +
+    #     member['lastName'][0]).title()
+    # dict_to_return['owner_name'] = team['name']
     return dict_to_return
 
 
