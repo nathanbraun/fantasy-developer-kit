@@ -21,7 +21,7 @@ config.read('config.ini')
 # constants - mostly loaded from config.ini - shouldn't need to change
 # if not working make sure you have config.ini set up
 API_URL = 'https://api.sims.fantasymath.com'
-SEASON = 2023
+SEASON = 2024
 
 if not Path('config.ini').is_file():
     print(dedent(f"""
@@ -330,7 +330,7 @@ if __name__ == '__main__':
 
     QUERY_STR = """
         query {
-            available (season: 2022, week: 1) {
+            available (season: 2024, week: 1) {
                 player_id,
                 name,
                 pos,
