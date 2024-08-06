@@ -1,6 +1,6 @@
-# 2023 Fantasy Football Developer Kit
-These are the files for 2023 Fantasy Football Developer Kit. If you're reading
-this and you *haven't* bought the 2023 kit yet, you can get it at
+# 2024 Fantasy Football Developer Kit
+These are the files for 2024 Fantasy Football Developer Kit. If you're reading
+this and you *haven't* bought the 2024 kit yet, you can get it at
 [https://fantasycoding.com](https://fantasycoding.com).
 
 If you have, let's get started.  See installation instructions and then pick
@@ -32,6 +32,9 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.17.0 (2024-08-06)
+Initial version for 2024 is ready! Reach out with any issues.
+
 ### v0.16.1 (2023-11-03)
 Fix code to deal with ESPN API change.
 
