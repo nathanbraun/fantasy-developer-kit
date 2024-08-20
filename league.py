@@ -100,6 +100,9 @@ def photo_finish(df):
 
 def wp_to_ml(wp):
     if wp > 0.5:
+    if (wp == 0 or wp == 1):
+        return 0
+    elif wp > 0.5:
         return int(round(-1*(100/((1 - wp)) - 100), 0))
     else:
         return int(round((100/((wp)) - 100), 0))
