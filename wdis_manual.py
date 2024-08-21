@@ -118,7 +118,7 @@ def plot(sims, team1, team2, wdis):
 
     # actual plotting portion
     g = sns.FacetGrid(points_long, hue='team', aspect=4)
-    g = g.map(sns.kdeplot, 'points', shade=True)
+    g = g.map(sns.kdeplot, 'points', fill=True)
     g.add_legend()
     g.fig.subplots_adjust(top=0.9)
     g.fig.suptitle('Team Fantasy Points Distributions - WDIS Options')
@@ -150,7 +150,7 @@ if __name__ == '__main__':
     pw.columns = ['sim', 'player', 'points']
 
     g = sns.FacetGrid(pw, hue='player', aspect=2)
-    g = g.map(sns.kdeplot, 'points', shade=True)
+    g = g.map(sns.kdeplot, 'points', fill=True)
     g.add_legend()
     g.fig.subplots_adjust(top=0.9)
     g.fig.suptitle(f'WDIS Projections')

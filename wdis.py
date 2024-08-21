@@ -16,7 +16,7 @@ from utilities import (LICENSE_KEY, generate_token, master_player_lookup,
 #####################
 LEAGUE = 'nate-league'
 WEEK = 1
-WRITE_OUTPUT = True
+WRITE_OUTPUT = False
 
 ##############################################
 # shouldn't have to change anything below this

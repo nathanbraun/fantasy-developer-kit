@@ -34,13 +34,14 @@ else:
     valid_players = get_players(token, season=SEASON, week=WEEK,
                                 **SCORING).set_index('player_id')
 
-(valid_players[['name', 'player_id']])[:20]
+(valid_players[['name']])[:20]
 
 # and query sims
 player_ids = team1_ids + team2_ids + bench_ids
 
 if USE_SAVED_DATA:
     sims = pd.read_csv(path.join('projects', 'wdis', 'data', 'sims.csv'))
+    sims.columns = [int(x) for x in sims.columns]
 else:
     sims = get_sims(token, player_ids, week=WEEK, season=SEASON, nsims=NSIMS,
                     **SCORING)
@@ -61,7 +62,7 @@ nsims[team2].sum(axis=1).head()
 team1_beats_team2 = nsims[team1].sum(axis=1) > nsims[team2].sum(axis=1)
 team1_beats_team2.head()
 
-team1_beats_team2.mean()
+print(team1_beats_team2.mean())
 
 # first cut at WDIS
 def simple_wdis(sims, team1, team2, wdis):
@@ -81,8 +82,8 @@ for player in wdis:
 # modify it to so it takes in a list of wdis players and analyzes them all
 def simple_wdis2(sims, team1, team2, wdis):
     return {
-        player: (sims[team1 + [player]].sum(axis=1) >
-                 sims[team2].sum(axis=1)).mean()
+        player: float((sims[team1 + [player]].sum(axis=1) >
+                 sims[team2].sum(axis=1)).mean())
         for player in wdis}
 
 simple_wdis2(nsims, team1_no_wdis, team2, wdis)
@@ -97,8 +98,8 @@ def simple_wdis3(sims, team1, team2, wdis):
     # team1_no_wdis_alt = set(team1) - set(wdis)
 
     return {
-        player: (sims[team1_no_wdis + [player]].sum(axis=1) >
-                 sims[team2].sum(axis=1)).mean() for player in wdis}
+        player: float((sims[team1_no_wdis + [player]].sum(axis=1) >
+                 sims[team2].sum(axis=1)).mean()) for player in wdis}
 
 simple_wdis3(nsims, team1, team2, wdis)
 simple_wdis3(nsims, team1, team2, ['saquon-barkley', 'darrell-henderson'])
@@ -122,20 +123,26 @@ def simple_wdis4(sims, team1, team2, wdis):
     assert len(bench_options) >= 1
 
     return Series({
-        player: (sims[team1_no_wdis + [player]].sum(axis=1) >
-                 sims[team2].sum(axis=1)).mean() for player in wdis}).sort_values(ascending=False)
+        player: float((sims[team1_no_wdis + [player]].sum(axis=1) >
+                 sims[team2].sum(axis=1)).mean()) for player in wdis}
+                  ).sort_values(ascending=False)
 
 
 simple_wdis4(nsims, team1, team2, wdis)
 
+# will throw an error:
+# simple_wdis4(nsims, team1, team2, ['darrell-henderson', 'ronald-jones',
+#                                    'tony-pollard'])
+
+# beyond WDIS
 # here's where we landed
 team1 = ['jalen-hurts', 'saquon-barkley', 'clyde-edwards-helaire',
          'keenan-allen', 'cooper-kupp', 'dallas-goedert', 'jason-myers',
-         'tb-dst']
+         'tb']
 
 team2 = ['matthew-stafford', 'christian-mccaffrey', 'antonio-gibson',
         'tyler-lockett', 'justin-jefferson', 'noah-fant', 'matt-gay',
-        'gb-dst']
+        'gb']
 
 
 current_starter = 'clyde-edwards-helaire'
@@ -158,7 +165,7 @@ nsims[bench_options].max(axis=1).head()
 pd.concat([nsims[bench_options].max(axis=1),
            nsims[current_starter]], axis=1).head()
 
-(nsims[bench_options].max(axis=1) > nsims[current_starter]).mean()
+print((nsims[bench_options].max(axis=1) > nsims[current_starter]).mean())
 
 # prob of losing because we start the wrong guy
 # pieces we need
@@ -172,7 +179,12 @@ team2_total = nsims[team2].sum(axis=1)
 # true if team w/ best backup > team2 AND team w/ starer we picked < team2
 regret_col = ((team1_w_best_backup > team2_total) &
               (team1_w_starter < team2_total))
-regret_col.mean()
+print(regret_col.mean())
+
+# true if team w/ best backup > team2 AND team w/ starer we picked < team2
+nailed_it_col = ((team1_w_best_backup < team2_total) &
+                 (team1_w_starter > team2_total))
+print(nailed_it_col.mean())
 
 # function forms
 def sumstats(starter):
@@ -198,18 +210,30 @@ def regret_prob(starter, bench):
     return ((team_w_best_backup > team2_total) &
             (team_w_starter < team2_total)).mean()
 
+def nailed_it_prob(starter, bench):
+    team_w_starter = nsims[team1_sans_starter].sum(axis=1) + nsims[starter]
+    team_w_best_backup = (nsims[team1_sans_starter].sum(axis=1) +
+                        nsims[bench].max(axis=1))
+
+    return ((team_w_best_backup < team2_total) &
+            (team_w_starter > team2_total)).mean()
+
 # CEH
-win_prob(current_starter)
-wrong_prob(current_starter, bench_options)
-regret_prob(current_starter, bench_options)
+print(sumstats('clyde-edwards-helaire'))
+print(win_prob(current_starter))
+print(wrong_prob(current_starter, bench_options))
+print(regret_prob(current_starter, bench_options))
+print(nailed_it_prob(current_starter, bench_options))
 
 # now with next best alternative, henderson
-sumstats('darrell-henderson')
-win_prob('darrell-henderson')
-wrong_prob('darrell-henderson',
-           ['clyde-edwards-helaire', 'ronald-jones', 'tony-pollard'])
-regret_prob('darrell-henderson',
-           ['clyde-edwards-helaire', 'ronald-jones', 'tony-pollard'])
+print(sumstats('darrell-henderson'))
+print(win_prob('darrell-henderson'))
+print(wrong_prob('darrell-henderson',
+           ['clyde-edwards-helaire', 'ronald-jones', 'tony-pollard']))
+print(regret_prob('darrell-henderson',
+           ['clyde-edwards-helaire', 'ronald-jones', 'tony-pollard']))
+print(nailed_it_prob('darrell-henderson',
+           ['clyde-edwards-helaire', 'ronald-jones', 'tony-pollard']))
 
 # and so on ...
 
@@ -267,6 +291,7 @@ df.head()
 # now regret prob
 # this time: ** trick, can p
 df['regret'] = [regret_prob(**scen) for scen in scenarios]
+df['nailed'] = [nailed_it_prob(**scen) for scen in scenarios]
 
 # final result:
 df.round(2)
@@ -313,6 +338,14 @@ def wdis_plus(sims, team1, team2, wdis):
         return ((team_w_best_backup > team2_total) &
                 (team_w_starter < team2_total)).mean()
 
+    def nailed_it_prob(starter, bench):
+        team_w_starter = sims[team1_sans_starter].sum(axis=1) + sims[starter]
+        team_w_best_backup = (sims[team1_sans_starter].sum(axis=1) +
+                            sims[bench].max(axis=1))
+
+        return ((team_w_best_backup < team2_total) &
+                (team_w_starter > team2_total)).mean()
+
 
     # start with DataFrame of summary stats
     df = pd.concat([sumstats(player) for player in wdis], axis=1)
@@ -323,6 +356,7 @@ def wdis_plus(sims, team1, team2, wdis):
     df['wp'] = [win_prob(x['starter']) for x in scenarios]
     df['wrong'] = [wrong_prob(**x) for x in scenarios]
     df['regret'] = [regret_prob(**x) for x in scenarios]
+    df['nailed'] = [nailed_it_prob(**x) for x in scenarios]
 
     return df.sort_values('wp', ascending=False)
 
@@ -342,6 +376,7 @@ fa_kicker_ids = [1188, 869, 1635, 1035, 435, 872, 1079, 1477, 1003, 981, 592,
 
 if USE_SAVED_DATA:
     k_sims = pd.read_csv(path.join('projects', 'wdis', 'data', 'k_sims.csv'))
+    k_sims.columns = [int(x) for x in k_sims.columns]
 else:
     k_sims = get_sims(token, fa_kicker_ids, week=WEEK, season=SEASON,
                       nsims=1000, **SCORING)
@@ -372,7 +407,7 @@ points_long.columns = ['sim', 'team', 'points']
 points_long.head(10)
 
 g = sns.FacetGrid(points_long, hue='team', aspect=2)
-g = g.map(sns.kdeplot, 'points', shade=True)
+g = g.map(sns.kdeplot, 'points', fill=True)
 g.add_legend()
 g.fig.subplots_adjust(top=0.9)
 g.fig.suptitle('Team Fantasy Points Distributions')
@@ -394,7 +429,7 @@ points_long.columns = ['sim', 'team', 'points']
 points_long.head(10)
 
 g = sns.FacetGrid(points_long, hue='team', aspect=2)
-g = g.map(sns.kdeplot, 'points', shade=True)
+g = g.map(sns.kdeplot, 'points', fill=True)
 g.add_legend()
 g.fig.subplots_adjust(top=0.9)
 g.fig.suptitle('Team Fantasy Points Distributions - WDIS Options')
@@ -429,7 +464,7 @@ def wdis_plot(nsims, team1, team2, wdis):
 
     # actual plotting portion
     g = sns.FacetGrid(points_long, hue='team', aspect=4)
-    g = g.map(sns.kdeplot, 'points', shade=True)
+    g = g.map(sns.kdeplot, 'points', fill=True)
     g.add_legend()
     g.fig.subplots_adjust(top=0.9)
     g.fig.suptitle('Team Fantasy Points Distributions - WDIS Options')
@@ -443,7 +478,7 @@ pw = nsims[wdis].stack().reset_index()
 pw.columns = ['sim', 'player', 'points']
 
 g = sns.FacetGrid(pw, hue='player', aspect=2)
-g = g.map(sns.kdeplot, 'points', shade=True)
+g = g.map(sns.kdeplot, 'points', fill=True)
 g.add_legend()
 g.fig.subplots_adjust(top=0.9)
 g.fig.suptitle(f'WDIS Projections')
