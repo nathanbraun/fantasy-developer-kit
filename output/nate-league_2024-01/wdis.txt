@@ -1,0 +1,40 @@
+WDIS Analysis, nate-league, Week 1
+
+Run at 2024-08-21 05:07:04.009974
+
+Recommended Starters:
+QB: Brock Purdy
+RB1: Christian McCaffrey
+RB2: Josh Jacobs
+WR1: Mike Evans
+WR2: Jaylen Waddle
+TE: Travis Kelce
+K: Jake Moody
+D/ST: BAL
+
+Detailed Projections and Win Probability:
+                                mean     wp  wrong  regret
+pos  name                                                 
+QB   Brock Purdy          123.051096  0.501  0.412   0.051
+     Geno Smith           120.210647  0.456  0.588   0.096
+RB1  Christian McCaffrey  123.051096  0.501  0.259   0.015
+     Devin Singletary     113.176230  0.378  0.878   0.138
+     Elijah Mitchell      110.144111  0.351  0.945   0.165
+     Kimani Vidal         109.920495  0.351  0.955   0.165
+     Jaleel McLaughlin    110.338173  0.348  0.963   0.168
+RB2  Josh Jacobs          123.051096  0.501  0.535   0.028
+     Devin Singletary     119.806455  0.454  0.747   0.075
+     Jaleel McLaughlin    116.968398  0.425  0.896   0.104
+     Kimani Vidal         116.550721  0.418  0.908   0.111
+     Elijah Mitchell      116.774337  0.413  0.914   0.116
+WR1  Mike Evans           123.051096  0.501  0.422   0.035
+     DeVonta Smith        120.685562  0.460  0.578   0.076
+WR2  Jaylen Waddle        123.051096  0.501  0.408   0.042
+     DeVonta Smith        120.166097  0.452  0.592   0.091
+TE   Travis Kelce         123.051096  0.501  0.171   0.010
+     Jonnu Smith          114.490182  0.398  0.829   0.113
+K    Jake Moody           123.051096  0.501  0.000   0.000
+D/ST BAL                  123.051096  0.501  0.445   0.030
+     GB                   121.750401  0.464  0.555   0.067
+
+Current starters maximize probability of winning.

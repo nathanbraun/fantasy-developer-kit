@@ -1,0 +1,42 @@
+
+**********************************
+Matchup Projections, Week 1 - 2024
+**********************************
+
+   wp_a  wp_b  over_under  spread   ml         team_a     team_b
+0  0.50  0.50      246.68     0.0  100  craigsoccer99     nbraun
+1  0.81  0.19      235.50    26.5 -424    steverynear     Brusda
+2  0.68  0.32      231.16    14.5 -213    strausskahn       Ryne
+3  0.50  0.50      247.06     0.0 -100        Deising  sporeilly
+4  0.55  0.45      245.16     4.0 -121       Stefense       komp
+5  0.38  0.62      256.14    -8.0  160      JonHanson      pdizz
+
+********************************
+Team Projections, Week 1 - 2024
+********************************
+
+                 mean    std     5%     25%  ...     95%  n  p_high  p_low
+owner_name                                   ...                          
+pdizz          132.74  23.36  94.22  116.74  ...  172.54  8    0.16   0.03
+steverynear    131.41  23.82  93.43  115.64  ...  172.83  7    0.16   0.03
+Stefense       124.84  23.09  87.92  109.79  ...  163.72  8    0.09   0.06
+JonHanson      124.16  22.51  87.92  107.94  ...  161.87  8    0.08   0.06
+strausskahn    123.63  22.25  87.09  108.49  ...  161.18  7    0.08   0.06
+Deising        123.54  23.29  85.61  107.65  ...  160.47  8    0.09   0.07
+craigsoccer99  123.31  21.82  86.66  108.90  ...  158.78  8    0.07   0.06
+nbraun         123.05  23.05  84.68  107.55  ...  160.99  8    0.07   0.08
+sporeilly      123.02  21.62  86.24  109.10  ...  158.04  8    0.09   0.06
+komp           121.33  22.60  84.86  105.80  ...  159.04  8    0.07   0.08
+Ryne           109.29  21.92  74.85   93.75  ...  146.03  8    0.03   0.18
+Brusda         104.99  20.49  70.06   91.40  ...  139.54  8    0.02   0.24
+
+[12 rows x 10 columns]
+
+Lock of the week:
+steverynear over Brusda — 0.81
+
+Photo-finish of the week::
+craigsoccer99 vs nbraun, 0.5-0.5
+
+Most unexciting game of the week:
+strausskahn vs Ryne, 231.16
