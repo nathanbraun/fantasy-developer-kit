@@ -284,6 +284,8 @@ def get_sims_from_file(filename):
     return sims
 
 def name_sims(sims, players):
+    if 'player_id' in players.columns:
+        players = players.set_index('player_id', copy=True)
     sims = DataFrame(sims, copy=True)
     sims.columns = list(players.loc[sims.columns, 'name']
                         .str.lower()
