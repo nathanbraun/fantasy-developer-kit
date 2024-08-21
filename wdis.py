@@ -15,8 +15,8 @@ from utilities import (LICENSE_KEY, generate_token, master_player_lookup,
 # set parameters here
 #####################
 LEAGUE = 'nate-league'
-WEEK = 2
-WRITE_OUTPUT = False
+WEEK = 1
+WRITE_OUTPUT = True
 
 ##############################################
 # shouldn't have to change anything below this
@@ -200,20 +200,20 @@ if __name__ == '__main__':
     ######################
     if WRITE_OUTPUT:
         league_wk_output_dir = path.join(
-            OUTPUT_PATH, f'{host}_{LEAGUE_ID}_2021-{str(WEEK).zfill(2)}')
+            OUTPUT_PATH, f'{LEAGUE}_2024-{str(WEEK).zfill(2)}')
 
         Path(league_wk_output_dir).mkdir(exist_ok=True)
 
         wdis_output_file = path.join(league_wk_output_dir, 'wdis.txt')
 
         with open(wdis_output_file, 'w') as f:
-            print(f"WDIS Analysis, Fleaflicker League {LEAGUE_ID}, Week {WEEK}", file=f)
+            print(f"WDIS Analysis, {LEAGUE}, Week {WEEK}", file=f)
             print("", file=f)
             print(f"Run at {dt.datetime.now()}", file=f)
             print("", file=f)
             print("Recommended Starters:", file=f)
             for starter, pos in zip(rec_starters, positions):
-                print(f"{pos}: {starter}", file=f)
+                print(f"{pos}: {players.loc[starter, 'name']}", file=f)
 
             print("", file=f)
             print("Detailed Projections and Win Probability:", file=f)
