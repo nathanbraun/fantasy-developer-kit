@@ -15,7 +15,7 @@ from utilities import (generate_token, LICENSE_KEY, DB_PATH,
 #####################
 LEAGUE = 'nate-league'
 WEEK = 1
-WRITE_OUTPUT = True
+WRITE_OUTPUT = False
 
 ##############################################
 # shouldn't have to change anything below this

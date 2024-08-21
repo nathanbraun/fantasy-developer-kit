@@ -46,7 +46,7 @@ YAHOO_FILE = config['yahoo']['FILE']
 YAHOO_KEY =  config['yahoo']['KEY']
 YAHOO_SECRET = config['yahoo']['SECRET']
 
-YAHOO_GAME_ID = 423  # changes every year - 423 for 2023
+YAHOO_GAME_ID = 449  # changes every year - 449 for 2024
 # endpoint to find YAHOO_GAME_ID:
 # 'https://fantasysports.yahooapis.com/fantasy/v2/game/nfl'
 # (need to query through yahoo oauth)
