@@ -32,6 +32,9 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.18.0 (2024-08-21)
+Some fixes for 2024, with fixing Yahoo game id being a big one.
+
 ### v0.17.0 (2024-08-06)
 Initial version for 2024 is ready! Reach out with any issues.
 
