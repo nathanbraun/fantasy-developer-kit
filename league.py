@@ -14,8 +14,8 @@ from utilities import (generate_token, LICENSE_KEY, DB_PATH,
 # set parameters here
 #####################
 LEAGUE = 'nate-league'
-WEEK = 3
-WRITE_OUTPUT = False
+WEEK = 1
+WRITE_OUTPUT = True
 
 ##############################################
 # shouldn't have to change anything below this
@@ -99,7 +99,6 @@ def photo_finish(df):
     return df.loc[closest_matchup_id].to_dict()
 
 def wp_to_ml(wp):
-    if wp > 0.5:
     if (wp == 0 or wp == 1):
         return 0
     elif wp > 0.5:
@@ -235,7 +234,7 @@ if __name__ == '__main__':
             .drop('team_id', axis=1))
 
     league_wk_output_dir = path.join(
-        OUTPUT_PATH, f'{host}_{LEAGUE_ID}_2023-{str(WEEK).zfill(2)}')
+        OUTPUT_PATH, f'{LEAGUE}_2024-{str(WEEK).zfill(2)}')
 
     Path(league_wk_output_dir).mkdir(exist_ok=True, parents=True)
 
@@ -247,7 +246,7 @@ if __name__ == '__main__':
             print(dedent(
                 f"""
                 **********************************
-                Matchup Projections, Week {WEEK} - 2023
+                Matchup Projections, Week {WEEK} - 2024
                 **********************************
                 """), file=f)
             print(matchup_df, file=f)
@@ -255,7 +254,7 @@ if __name__ == '__main__':
             print(dedent(
                 f"""
                 ********************************
-                Team Projections, Week {WEEK} - 2023
+                Team Projections, Week {WEEK} - 2024
                 ********************************
                 """), file=f)
 
@@ -303,7 +302,7 @@ if __name__ == '__main__':
 
         g = sns.FacetGrid(teams_long_w_desc.replace(team_to_owner), hue='team_id',
                         col='desc', col_wrap=2, aspect=2)
-        g = g.map(sns.kdeplot, 'pts', shade=True)
+        g = g.map(sns.kdeplot, 'pts', fill=True)
         g.add_legend()
         g.fig.subplots_adjust(top=0.9)
         g.fig.suptitle(f'Team Points Distributions by Matchup 2 - Week {WEEK}')
@@ -313,13 +312,13 @@ if __name__ == '__main__':
     else:
         print('\n')
         print('**********************************')
-        print(f'Matchup Projections, Week {WEEK} - 2023')
+        print(f'Matchup Projections, Week {WEEK} - 2024')
         print('**********************************')
         print('\n')
         print(matchup_df)
         print('\n')
         print('**********************************')
-        print(f'Team Projections, Week {WEEK} - 2023')
+        print(f'Team Projections, Week {WEEK} - 2024')
         print('**********************************')
         print('\n')
         print(team_df.sort_values('mean', ascending=False).round(2))
