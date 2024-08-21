@@ -119,15 +119,38 @@ nsims[['justin-herbert', 'min']].corr()
 
 nsims[['justin-herbert', 'keenan-allen', 'min']].corr()
 
-(sims[['justin-herbert', 'josh-jacobs', 'keenan-allen', 'jordan-love', 'lv']]
-    .corr()
- .round(2))
+nsims[['justin-herbert', 'kirk-cousins', 'keenan-allen', 'justin-jefferson',
+       'min', 'jordan-love']].corr().round(2)
 
-sims['keenan-allen'].describe()
+nsims['keenan-allen'].describe()
 
 pd.concat([
-    sims.loc[sims['justin-herbert'] > 30, 'keenan-allen'].describe(),
-    sims.loc[sims['justin-herbert'] < 12, 'keenan-allen'].describe()], axis=1)
+    nsims.loc[nsims['justin-herbert'] > 30, 'keenan-allen'].describe(),
+    nsims.loc[nsims['justin-herbert'] < 12, 'keenan-allen'].describe()], axis=1)
+
+# who should i start monday night
+print((nsims['mike-evans'] > nsims['tee-higgins']).mean())
+
+print((nsims[['joe-burrow', 'mike-evans']].sum(axis=1) > 50).mean())
+
+print((nsims[['joe-burrow', 'tee-higgins']].sum(axis=1) > 50).mean())
+
+# offense or defense as underog or favorite
+nsims[['min', 'pit']].describe()
+
+nsims[['justin-herbert', 'min', 'pit']].corr()
+
+print((nsims[['geno-smith', 'pit']].sum(axis=1) >
+    nsims[['justin-herbert', 'dal']].sum(axis=1)).mean())
+
+print((nsims[['geno-smith', 'min']].sum(axis=1) >
+    nsims[['justin-herbert', 'ne']].sum(axis=1)).mean())
+
+print((nsims[['patrick-mahomes', 'pit']].sum(axis=1) >
+    nsims[['justin-herbert', 'dal']].sum(axis=1)).mean())
+
+print((nsims[['patrick-mahomes', 'min']].sum(axis=1) >
+    nsims[['justin-herbert', 'dal']].sum(axis=1)).mean())
 
 (sims['aaron-rodgers'] > sims['matthew-stafford']).mean()
 
