@@ -13,7 +13,7 @@ pd.options.mode.chained_assignment = None
 
 def get_league_rosters(lookup, league_id, week=None, starting=True,
                        skip_kickers=False):
-    roster_url = (f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+    roster_url = (f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
                   f'/segments/0/leagues/{league_id}?view=mRoster')
 
     roster_json = requests.get(roster_url,
@@ -23,7 +23,7 @@ def get_league_rosters(lookup, league_id, week=None, starting=True,
                             ignore_index=True)
 
     # score part
-    boxscore_url = (f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+    boxscore_url = (f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
                     f'/segments/0/leagues/{league_id}?view=mBoxscore')
     boxscore_json = requests.get(boxscore_url, cookies={'swid': SWID, 'espn_s2':
                                                         ESPN_S2}).json()
@@ -47,7 +47,7 @@ def get_league_rosters(lookup, league_id, week=None, starting=True,
     return all_rosters_w_id
 
 def get_teams_in_league(league_id, example=False):
-    teams_url = (f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+    teams_url = (f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
                 f'/segments/0/leagues/{league_id}?view=mTeam')
 
     if example:
@@ -64,7 +64,7 @@ def get_teams_in_league(league_id, example=False):
     return teams_df
 
 def get_league_schedule(league_id, example=False):
-    schedule_url = f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}/segments/0/leagues/{league_id}?view=mBoxscore'
+    schedule_url = f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}/segments/0/leagues/{league_id}?view=mBoxscore'
 
     if example:
         with open('./projects/integration/raw/espn/schedule.json') as f:

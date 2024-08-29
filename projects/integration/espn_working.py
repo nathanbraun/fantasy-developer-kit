@@ -21,7 +21,7 @@ WEEK = 2
 ###############################################################################
 # roster data
 ###############################################################################
-roster_url = (f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+roster_url = (f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
               f'/segments/0/leagues/{LEAGUE_ID}?view=mRoster')
 
 # saved data
@@ -144,7 +144,7 @@ all_rosters.sample(15)
 # AFTER PHI-MIN already played
 # so want to grab those actual scores too
 
-boxscore_url = (f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+boxscore_url = (f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
                 f'/segments/0/leagues/{LEAGUE_ID}?view=mBoxscore')
 
 
@@ -228,7 +228,7 @@ all_rosters_final = all_rosters_w_id.drop('espn_id', axis=1)
 all_rosters_final.sample(10)
 
 def get_league_rosters(lookup, league_id, week):
-    roster_url = (f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+    roster_url = (f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
                   f'/segments/0/leagues/{league_id}?view=mRoster')
 
     roster_json = requests.get(
@@ -240,7 +240,7 @@ def get_league_rosters(lookup, league_id, week):
 
     # score part
     boxscore_url = (
-        f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+        f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
             f'/segments/0/leagues/{league_id}?view=mBoxscore')
     boxscore_json = requests.get(
         boxscore_url,
@@ -271,7 +271,7 @@ complete_league_rosters.head(10)
 # team data
 ###############################################################################
 
-teams_url = (f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+teams_url = (f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
              f'/segments/0/leagues/{LEAGUE_ID}?view=mTeam')
 
 if USE_SAVED_DATA:
@@ -302,7 +302,7 @@ DataFrame([process_member(member) for member in members_list])
 
 def get_teams_in_league(league_id):
     teams_url = (
-        f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+        f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
             f'/segments/0/leagues/{league_id}?view=mTeam')
 
     teams_json = requests.get(
@@ -329,7 +329,7 @@ else:
 ###############################################################################
 
 schedule_url = (
-    f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+    f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
         f'/segments/0/leagues/{LEAGUE_ID}?view=mBoxscore')
 
 if USE_SAVED_DATA:
@@ -363,7 +363,7 @@ matchup_df = DataFrame([process_matchup(matchup) for matchup in matchup_list])
 matchup_df.head(10)
 
 def get_league_schedule(league_id):
-    schedule_url = f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}/segments/0/leagues/{LEAGUE_ID}?view=mBoxscore'
+    schedule_url = f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}/segments/0/leagues/{LEAGUE_ID}?view=mBoxscore'
 
     schedule_json = requests.get(
         schedule_url,
@@ -396,17 +396,17 @@ league_schedule.head()
 ##################################
 ## get data from ESPN and FM apis
 ##################################
-#roster_url = (f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+#roster_url = (f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
 #              f'/segments/0/leagues/{LEAGUE_ID}?view=mRoster')
 
-#boxscore_url = (f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+#boxscore_url = (f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
 #                f'/segments/0/leagues/{LEAGUE_ID}?view=mBoxscore')
 
-#teams_url = (f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+#teams_url = (f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
 #             f'/segments/0/leagues/{LEAGUE_ID}?view=mTeam')
 
 #schedule_url = (
-#    f'https://fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
+#    f'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{SEASON}' +
 #        f'/segments/0/leagues/{LEAGUE_ID}?view=mBoxscore')
 
 #roster_json = requests.get(roster_url, cookies={'swid': SWID, 'espn_s2':
