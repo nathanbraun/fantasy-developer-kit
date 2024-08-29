@@ -189,11 +189,11 @@ if __name__ == '__main__':
               'name'].values))
         
     # update df_start with players
-    df_start = (pd.merge(df_start, players[['name']], left_index=True,
-                        right_index=True)
-                .reset_index()
-                .set_index(['pos', 'name'])
-                .drop('player_id', axis=1))
+    # make name column using value of player_id
+    df_start.reset_index(inplace=True)
+    df_start['name'] = df_start['player_id'].map(players['name'].to_dict())
+    df_start.set_index(['pos', 'name'], inplace=True)
+
 
     ######################
     # write output to file
