@@ -32,6 +32,9 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.19.1 (2024-08-29)
+Fix a few bugs in utilities/quickstart.
+
 ### v0.19.0 (2024-08-29)
 Fix bug with ESPN leagues by updating the URL.
 
