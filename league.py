@@ -39,8 +39,7 @@ def summarize_matchup(sims_a, sims_b):
     over_under = (total_a + total_b).median()
 
     # spread
-    spread = (total_a - total_b).median().round(2)
-    spread = round(spread*2)/2
+    spread = round((total_a - total_b).median(), 2)
 
     # moneyline
     ml_a = wp_to_ml(winprob_a)
