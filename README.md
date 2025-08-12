@@ -1,6 +1,6 @@
-# 2024 Fantasy Football Developer Kit
-These are the files for 2024 Fantasy Football Developer Kit. If you're reading
-this and you *haven't* bought the 2024 kit yet, you can get it at
+# 2025 Fantasy Football Developer Kit
+These are the files for 2025 Fantasy Football Developer Kit. If you're reading
+this and you *haven't* bought the 2025 kit yet, you can get it at
 [https://fantasycoding.com](https://fantasycoding.com).
 
 If you have, let's get started.  See installation instructions and then pick
@@ -32,6 +32,9 @@ you can paste your developer kit license key in it. More details in the PDF
 guide.
 
 ## Changelog
+### v0.20.2 (2025-08-19)
+Initial version for 2025 is ready! Week 1 projections up. Fantasy Math is live. Reach out with any issues.
+
 ### v0.19.1 (2024-08-29)
 Fix a few bugs in utilities/quickstart.
 

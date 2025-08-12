@@ -21,7 +21,7 @@ config.read('config.ini')
 # constants - mostly loaded from config.ini - shouldn't need to change
 # if not working make sure you have config.ini set up
 API_URL = 'https://api.sims.fantasymath.com'
-SEASON = 2024
+SEASON = 2025
 
 if not Path('config.ini').is_file():
     print(dedent(f"""
@@ -46,7 +46,7 @@ YAHOO_FILE = config['yahoo']['FILE']
 YAHOO_KEY =  config['yahoo']['KEY']
 YAHOO_SECRET = config['yahoo']['SECRET']
 
-YAHOO_GAME_ID = 449  # changes every year - 449 for 2024
+YAHOO_GAME_ID = 461  # changes every year - 461 for 2025
 # endpoint to find YAHOO_GAME_ID:
 # 'https://fantasysports.yahooapis.com/fantasy/v2/game/nfl'
 # (need to query through yahoo oauth)
@@ -243,7 +243,7 @@ def get_sims(token, players, qb='pass_6', skill='ppr_1', dst='dst_std',
     # check for valid arguments
     ###########################
     _check_arg('week', week, range(1, 19), none_ok=True)
-    _check_arg('season', season, range(2020, 2024), none_ok=True)
+    _check_arg('season', season, range(2020, 2026), none_ok=True)
     _check_arg('qb scoring', qb, ['pass_6', 'pass_4'])
     _check_arg('rb/wr/te scoring', skill, ['ppr_1', 'ppr_0', 'ppr_1over2'])
     _check_arg('dst scoring', dst, ['dst_high', 'dst_std'])
