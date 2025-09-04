@@ -248,7 +248,7 @@ def get_sims(token, players, qb='pass_6', skill='ppr_1', dst='dst_std',
     _check_arg('rb/wr/te scoring', skill, ['ppr_1', 'ppr_0', 'ppr_1over2'])
     _check_arg('dst scoring', dst, ['dst_high', 'dst_std'])
 
-    player_str = ','.join([f'"{x}"' for x in players])
+    player_str = ','.join([f'"{int(x)}"' for x in players])
 
     arg_string = f'qb: "{qb}", skill: "{skill}", dst: "{dst}", nsims: {nsims}, player_ids: [{player_str}]'
 
