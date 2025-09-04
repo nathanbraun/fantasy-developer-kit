@@ -233,7 +233,7 @@ if __name__ == '__main__':
             .drop('team_id', axis=1))
 
     league_wk_output_dir = path.join(
-        OUTPUT_PATH, f'{LEAGUE}_2024-{str(WEEK).zfill(2)}')
+        OUTPUT_PATH, f'{LEAGUE}_2025-{str(WEEK).zfill(2)}')
 
     Path(league_wk_output_dir).mkdir(exist_ok=True, parents=True)
 
@@ -245,7 +245,7 @@ if __name__ == '__main__':
             print(dedent(
                 f"""
                 **********************************
-                Matchup Projections, Week {WEEK} - 2024
+                Matchup Projections, Week {WEEK} - 2025
                 **********************************
                 """), file=f)
             print(matchup_df, file=f)
@@ -253,7 +253,7 @@ if __name__ == '__main__':
             print(dedent(
                 f"""
                 ********************************
-                Team Projections, Week {WEEK} - 2024
+                Team Projections, Week {WEEK} - 2025
                 ********************************
                 """), file=f)
 
@@ -311,13 +311,13 @@ if __name__ == '__main__':
     else:
         print('\n')
         print('**********************************')
-        print(f'Matchup Projections, Week {WEEK} - 2024')
+        print(f'Matchup Projections, Week {WEEK} - 2025')
         print('**********************************')
         print('\n')
         print(matchup_df)
         print('\n')
         print('**********************************')
-        print(f'Team Projections, Week {WEEK} - 2024')
+        print(f'Team Projections, Week {WEEK} - 2025')
         print('**********************************')
         print('\n')
         print(team_df.sort_values('mean', ascending=False).round(2))
